@@ -1,4 +1,4 @@
-const pinyin = require('pinyin');
+const { pinyin, PINYIN_STYLE } = require('@napi-rs/pinyin');
 const { slugify: _slugify } = require('@vuepress/shared-utils');
 
 module.exports = {
@@ -20,6 +20,15 @@ module.exports = {
             },
         },
         '@vuepress/back-to-top': true,
+        sitemap: {
+            hostname: 'https://docs.rsshub.app',
+        },
+        'vuepress-plugin-meilisearch': {
+            hostUrl: 'https://meilisearch.rsshub.app',
+            apiKey: '375c36cd9573a2c1d1e536214158c37120fdd0ba6cd8829f7a848e940cc22245',
+            indexUid: 'rsshub',
+            maxSuggestions: 14,
+        },
     },
     locales: {
         '/': {
@@ -34,24 +43,31 @@ module.exports = {
         },
     },
     markdown: {
-        slugify: function(s) {
-            return _slugify(
-                pinyin(s, {
-                    style: pinyin.STYLE_NORMAL,
-                    heteronym: true,
-                    segment: true,
-                })
-                    .map((item) => item[0])
-                    .join('-')
-            );
-        },
         anchor: {
-            permalink: true,
-            permalinkBefore: true,
-            permalinkSymbol: '#',
+            level: 999, // Disable original Plugin
+        },
+        extendMarkdown: (md) => {
+            md.use(require('../.format/md/hierarchySlug'), {
+                slugify(s) {
+                    return _slugify(
+                        pinyin(s, {
+                            style: PINYIN_STYLE.Plain,
+                            heteronym: true,
+                            segment: true,
+                        })
+                            .map((item) => item[0])
+                            .join('-')
+                    );
+                },
+                level: 2,
+                permalink: true,
+                permalinkBefore: true,
+                permalinkSymbol: '#',
+            });
         },
     },
     head: [
+        ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1.0' }],
         ['link', { rel: 'icon', href: '/logo.png' }],
         ['link', { rel: 'manifest', href: '/manifest.json' }],
         ['meta', { name: 'theme-color', content: '#fff' }],
@@ -59,19 +75,14 @@ module.exports = {
         ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }],
         ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
         ['link', { rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#ff8549' }],
+        ['script', { type: 'text/javascript', src: 'https://cdn.wwads.cn/js/makemoney.js' }],
     ],
+    theme: 'vuepress-theme-rsshub',
     themeConfig: {
         repo: 'DIYgod/RSSHub',
         editLinks: true,
         docsDir: 'docs',
         smoothScroll: true,
-        algolia: {
-            apiKey: '6247bc0db93150fd9e531b93a3fa4046',
-            indexName: 'rsshub',
-            algoliaOptions: {
-                hitsPerPage: 14,
-            },
-        },
         locales: {
             '/': {
                 lang: 'zh-CN',
@@ -79,24 +90,7 @@ module.exports = {
                 label: '简体中文',
                 editLinkText: '在 GitHub 上编辑此页',
                 lastUpdated: '上次更新',
-                nav: [
-                    {
-                        text: '指南',
-                        link: '/',
-                    },
-                    {
-                        text: '参与我们',
-                        link: '/joinus/',
-                    },
-                    {
-                        text: '部署',
-                        link: '/install/',
-                    },
-                    {
-                        text: '支持 RSSHub',
-                        link: '/support/',
-                    },
-                ],
+                nav: require('./nav/zh'),
                 sidebar: {
                     '/': [
                         {
@@ -129,6 +123,8 @@ module.exports = {
                                 'reading',
                                 'government',
                                 'study',
+                                'journal',
+                                'finance',
                                 'other',
                             ],
                         },
@@ -141,24 +137,7 @@ module.exports = {
                 label: 'English',
                 editLinkText: 'Edit this page on GitHub',
                 lastUpdated: 'Last Updated',
-                nav: [
-                    {
-                        text: 'Guide',
-                        link: '/en/',
-                    },
-                    {
-                        text: 'Join us',
-                        link: '/en/joinus/',
-                    },
-                    {
-                        text: 'Deploy',
-                        link: '/en/install/',
-                    },
-                    {
-                        text: 'Support RSSHub',
-                        link: '/en/support/',
-                    },
-                ],
+                nav: require('./nav/en'),
                 sidebar: {
                     '/en/': [
                         {
@@ -191,6 +170,8 @@ module.exports = {
                                 'reading',
                                 'government',
                                 'study',
+                                'journal',
+                                'finance',
                                 'other',
                             ],
                         },

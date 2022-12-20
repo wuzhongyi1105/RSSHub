@@ -5,17 +5,20 @@
 
 > 🍰 Everything is RSSible
 
-[![telegram](https://img.shields.io/badge/chat-telegram-brightgreen.svg?style=flat-square)](https://t.me/rsshub)
-[![build status](https://img.shields.io/travis/DIYgod/RSSHub/master.svg?style=flat-square)](https://travis-ci.org/DIYgod/RSSHub)
-[![Test coverage](https://img.shields.io/codecov/c/github/DIYgod/RSSHub.svg?style=flat-square)](https://codecov.io/github/DIYgod/RSSHub?branch=master)
+[![telegram](https://img.shields.io/badge/chat-telegram-brightgreen.svg?logo=telegram&style=flat-square)](https://t.me/rsshub)
+[![npm publish](https://img.shields.io/github/actions/workflow/status/DIYgod/RSSHub/npm-publish.yml?branch=master&label=npm%20publish&logo=npm&style=flat-square)](https://www.npmjs.com/package/rsshub)
+[![docker publish](https://img.shields.io/github/actions/workflow/status/DIYgod/RSSHub/docker-release.yml?branch=master&label=docker%20publish&logo=docker&style=flat-square)](https://hub.docker.com/r/diygod/rsshub)
+[![test](https://img.shields.io/github/actions/workflow/status/DIYgod/RSSHub/test.yml?branch=master&label=test&logo=github&style=flat-square)](https://github.com/DIYgod/RSSHub/actions/workflows/test.yml?query=event%3Apush+branch%3Amaster)
+[![Test coverage](https://img.shields.io/codecov/c/github/DIYgod/RSSHub.svg?style=flat-square&logo=codecov)](https://app.codecov.io/gh/DIYgod/RSSHub/branch/master)
+[![Foresight Docs](https://api-public.service.runforesight.com/api/v1/badge/success?repoId=5da20e56-cecf-4b05-9bcd-cab097fb2dca)](https://docs.runforesight.com/)
 
 ## Introduction
 
-RSSHub is an open source, easy to use, and extensible RSS feed aggregator, it's capable of generating RSS feeds from pretty much everything.
+RSSHub is an open source, easy to use, and extensible RSS feed generator. It's capable of generating RSS feeds from pretty much everything.
 
 RSSHub delivers millions of contents aggregated from all kinds of sources, our vibrant open source community is ensuring the deliver of RSSHub's new routes, new features and bug fixes.
 
-RSSHub can be used with browser extension [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar)
+RSSHub can be used with browser extension [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar) and mobile auxiliary app [RSSBud](https://github.com/Cay-Zhang/RSSBud) (iOS) and [RSSAid](https://github.com/LeetaoGoooo/RSSAid) (Android)
 
 [English docs](https://docs.rsshub.app/en) | [Telegram Group](https://t.me/rsshub) | [Telegram Channel](https://t.me/awesomeRSSHub)
 
@@ -23,7 +26,7 @@ RSSHub can be used with browser extension [RSSHub Radar](https://github.com/DIYg
 
 RSSHub 是一个开源、简单易用、易于扩展的 RSS 生成器，可以给任何奇奇怪怪的内容生成 RSS 订阅源。RSSHub 借助于开源社区的力量快速发展中，目前已适配数百家网站的上千项内容
 
-可以配合浏览器扩展 [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar) 食用
+可以配合浏览器扩展 [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar) 和 移动端辅助 App [RSSBud](https://github.com/Cay-Zhang/RSSBud) (iOS) 与 [RSSAid](https://github.com/LeetaoGoooo/RSSAid) (Android) 食用
 
 [中文文档](https://docs.rsshub.app) | [Telegram 群](https://t.me/rsshub) | [Telegram 频道](https://t.me/awesomeRSSHub)
 
@@ -31,15 +34,21 @@ RSSHub 是一个开源、简单易用、易于扩展的 RSS 生成器，可以�
 
 ### Special Sponsors
 
-<div>
-<a href="https://rixcloud.app/rsshub" target="_blank"><img height="60px" src="https://i.imgur.com/TrgP3S1.png"></a>&nbsp;&nbsp;&nbsp;<a href="https://angelia.codeeer.com" target="_blank"><img height="60px" src="https://i.imgur.com/oQf2WJl.png"></a>&nbsp;&nbsp;&nbsp;<a href="https://lizhi.io/store" target="_blank"><img height="60px" src="https://i.imgur.com/1u6jJ6L.jpg"></a>
-</div>
+<p>
+<a href="https://rss3.io/" target="_blank"><img height="60px" src="https://i.imgur.com/vHtI4bz.png"></a>
+</p>
 
-### Sponsors
+<table width="100%">
+<tr>
+<td><img width="1000" height="0"><a href="https://www.runforesight.com/?utm_source=RSSHub&utm_medium=sponsorship"><img src="https://www.thundra.io/hubfs/RunForesight/GitHub%20Sponsorship%20banners/github-actions-observability.png"
+alt="Foresight" width="260" align="right"></a><h3>Foresight: Increase CI/CD Health & Test Performance</h3><p>
+Foresight provides full visibility and deep insights into the health and performance of your tests and CI pipelines. Assess the risk of code changes, deal with flaky tests, see workflow and test trends over time, and improve the contributing experience with Foresight.</p>
 
-| [Sayori Studio](https://t.me/SayoriStudio) | Anonymous | [Sion Kazama](https://blog.sion.moe) | [琚致远](https://www.shaoyaoju.org/) | [Rolly RSS Reader](https://www.coolapk.com/apk/239500) | [mokeyjay](https://www.mokeyjay.com/) | [tkaray](https://rayray.moe/) |
-| :----------------------------------------: | :-------: | :----------------------------------: | :----------------------------------: | :----------------------------------------------------: | :-----------------------------------: | :---------------------------: |
+[Sign up now!](https://runforesight.com/?utm_source=RSSHub&utm_medium=sponsorship)
 
+</td>
+</tr>
+</table>
 
 [![](https://opencollective.com/static/images/become_sponsor.svg)](https://docs.rsshub.app/en/support/)
 
@@ -53,13 +62,20 @@ Logo designer [sheldonrrr](https://dribbble.com/sheldonrrr)
 
 <a href="https://www.cloudflare.com" target="_blank"><img height="50px" src="https://i.imgur.com/7Ph27Fq.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.netlify.com" target="_blank"><img height="40px" src="https://i.imgur.com/cU01915.png"></a>
 
+## Related Projects
+
+-   [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar) | 一个可以帮助你快速发现和订阅当前网站 RSS 和 RSSHub 的浏览器扩展
+-   [RSSBud](https://github.com/Cay-Zhang/RSSBud) ([TestFlight 公测](https://testflight.apple.com/join/rjCVzzHP)) | iOS 平台的 RSSHub Radar，专为移动生态优化
+-   [RSSAid](https://github.com/LeetaoGoooo/RSSAid)  | 基于 Flutter 构建的 Android 平台的 RSSHub Radar
+-   [DocSearch](https://github.com/Fatpandac/DocSearch) | Link RSSHub DocSearch into Raycast
+
 ## Join Us
 
 We welcome all pull requests. Suggestions and feedback are also welcomed [here](https://github.com/DIYgod/RSSHub/issues).
 
-Refer to [Join Us](https://docs.rsshub.app/en/joinus/)
+Refer to [Join Us](https://docs.rsshub.app/en/joinus/quick-start.html)
 
-见 [参与我们](https://docs.rsshub.app/joinus/)
+见 [参与我们](https://docs.rsshub.app/joinus/quick-start.html)
 
 ## Deployment
 
@@ -81,6 +97,7 @@ You can support RSSHub via donations.
 
 Recurring donors will be rewarded via express issue response, or even have your name displayed on our GitHub page and website.
 
+-   Become a Sponser on [GitHub](https://github.com/sponsors/DIYgod)
 -   Become a Sponser on [Patreon](https://www.patreon.com/DIYgod)
 -   Become a Sponser on [爱发电](https://afdian.net/@diygod)
 -   Contact us directly: i@diygod.me
@@ -89,8 +106,8 @@ Recurring donors will be rewarded via express issue response, or even have your 
 
 We accept donations via the following ways:
 
--   [WeChat Pay](https://i.loli.net/2019/03/23/5c950ebbc373e.png)
--   [Alipay](https://i.loli.net/2019/03/23/5c950ebbc980e.png)
+-   [WeChat Pay](https://diygod.me/images/wx.jpg)
+-   [Alipay](https://diygod.me/images/zfb.jpg)
 -   [Paypal](https://www.paypal.me/DIYgod)
 
 ## Author
