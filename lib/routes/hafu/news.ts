@@ -1,5 +1,6 @@
-import { Route } from '@/types';
-import parseList from './utils';
+import type { Route } from '@/types';
+
+import { parseList } from './utils';
 
 export const route: Route = {
     path: '/news/:type?',

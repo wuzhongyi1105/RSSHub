@@ -1,10 +1,11 @@
-import { Route } from '@/types';
-import { getSubPath } from '@/utils/common-utils';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
+
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
+import { getSubPath } from '@/utils/common-utils';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '*',
@@ -65,7 +66,7 @@ async function handler(ctx) {
 
                     item.title = content('meta[name="ArticleTitle"]').attr('content');
                     item.author = content('meta[name="contentSource"]').attr('content');
-                    item.pubDate = timezone(parseDate(content('meta[name="pubdate"]').attr('content')), +8);
+                    item.pubDate = timezone(parseDate(content('meta[name="pubdate"]').attr('content')), 8);
                     item.category = [content('meta[name="ColumnName"]').attr('content')];
 
                     item.description = content('.arccont').html();

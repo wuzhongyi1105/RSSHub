@@ -1,16 +1,16 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
 
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
-import { art } from '@/utils/render';
-import path from 'node:path';
+import timezone from '@/utils/timezone';
+
+import { renderDescription } from './templates/description';
 
 export const handler = async (ctx) => {
     const { id = '1' } = ctx.req.param();
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 10;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 10;
 
     const rootUrl = 'https://www.eshukan.com';
     const currentUrl = new URL(`academic/index.aspx?cid=${id}`, rootUrl).href;
@@ -35,14 +35,14 @@ export const handler = async (ctx) => {
 
             item.find('p span').remove();
 
-            const description = art(path.join(__dirname, 'templates/description.art'), {
+            const description = renderDescription({
                 intro: item.find('p').text(),
             });
 
             return {
                 title,
                 description,
-                pubDate: pubDate ? timezone(parseDate(pubDate), +8) : undefined,
+                pubDate: pubDate ? timezone(parseDate(pubDate), 8) : undefined,
                 link: new URL(a.prop('href'), currentUrl).href,
                 content: {
                     html: description,
@@ -59,7 +59,7 @@ export const handler = async (ctx) => {
                 const $$ = load(detailResponse);
 
                 const title = $$('h1').text();
-                const description = art(path.join(__dirname, 'templates/description.art'), {
+                const description = renderDescription({
                     intro: $$('div.summary').html(),
                     description: $$('div.detail').html(),
                 });
@@ -69,7 +69,7 @@ export const handler = async (ctx) => {
 
                 item.title = title;
                 item.description = description;
-                item.pubDate = pubDate ? timezone(parseDate(pubDate), +8) : item.pubDate;
+                item.pubDate = pubDate ? timezone(parseDate(pubDate), 8) : item.pubDate;
                 item.author = $$('div.author a').text();
                 item.content = {
                     html: description,
@@ -104,9 +104,8 @@ export const route: Route = {
     example: '/eshukan/academic/1',
     parameters: { category: '栏目 id，默认为 `1`，即期刊动态，可在对应栏目页 URL 中找到' },
     description: `::: tip
-  若订阅 [期刊动态](https://www.eshukan.com/academic/index.aspx?cid=1)，网址为 \`https://www.eshukan.com/academic/index.aspx?cid=1\`。截取 \`https://www.eshukan.com/academic/index.aspx?cid=\` 到末尾的部分 \`1\` 作为参数填入，此时路由为 [\`/eshukan/academic/1\`](https://rsshub.app/eshukan/academic/1)。
-:::
-    `,
+若订阅 [期刊动态](https://www.eshukan.com/academic/index.aspx?cid=1)，网址为 \`https://www.eshukan.com/academic/index.aspx?cid=1\`。截取 \`https://www.eshukan.com/academic/index.aspx?cid=\` 到末尾的部分 \`1\` 作为参数填入，此时路由为 [\`/eshukan/academic/1\`](https://rsshub.app/eshukan/academic/1)。
+:::`,
     categories: ['study'],
 
     features: {

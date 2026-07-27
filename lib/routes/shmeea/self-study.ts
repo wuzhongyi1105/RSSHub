@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -32,7 +33,7 @@ function load_detail(list, cache) {
                     title: notice_item('a').attr('title'),
                     description: detail('.Article_content').html(),
                     link: url,
-                    pubDate: timezone(parseDate(detail('.PBtime').text(), 'YYYY-MM-DD HH:mm:ss'), +8),
+                    pubDate: timezone(parseDate(detail('.PBtime').text(), 'YYYY-MM-DD HH:mm:ss'), 8),
                 };
             });
         })

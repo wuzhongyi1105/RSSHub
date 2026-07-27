@@ -1,5 +1,6 @@
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -19,7 +20,7 @@ async function loadContent(link) {
                 .text()
                 .match(/\d{4}(?:\/\d{2}){2}/)
         ),
-        +8
+        8
     );
 
     // 提取内容

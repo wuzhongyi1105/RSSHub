@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -56,7 +57,7 @@ async function handler(ctx) {
                 item.description = $('div.article-content').html();
 
                 const rawDate = $('div.article-desc span').eq(1).text();
-                item.pubDate = timezone(parseDate(rawDate.replace('更新时间：', '')), +8);
+                item.pubDate = timezone(parseDate(rawDate.replace('更新时间：', '')), 8);
 
                 return item;
             })

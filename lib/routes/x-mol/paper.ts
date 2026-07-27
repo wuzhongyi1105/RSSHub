@@ -1,11 +1,13 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+import pMap from 'p-map';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import utils from './utils';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import pMap from 'p-map';
+
+import utils from './utils';
 
 export const route: Route = {
     path: '/paper/:type/:magazine',
@@ -39,7 +41,7 @@ async function handler(ctx) {
 
     const newsItem = $('.magazine-model-content-new li')
         .toArray()
-        .slice(0, ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 20)
+        .slice(0, ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 20)
         .map((item) => {
             item = $(item);
             return {

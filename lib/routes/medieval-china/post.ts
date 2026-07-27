@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -32,7 +33,7 @@ async function handler(ctx) {
         .map((item) => ({
             title: item.title,
             link: `${baseUrl}${item.path}`,
-            pubDate: timezone(parseDate(item.date), +8),
+            pubDate: timezone(parseDate(item.date), 8),
         }));
     const items = await Promise.all(
         posts.map((item) =>

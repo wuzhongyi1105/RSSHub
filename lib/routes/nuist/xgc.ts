@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 
 const baseTitle = '南信大学生工作处';
@@ -50,9 +51,8 @@ async function handler() {
     const items = await Promise.all(
         list.map((item) =>
             cache.tryGet(item.link, async () => {
-                let response;
                 try {
-                    response = await got(item.link);
+                    const response = await got(item.link);
                     const $ = load(response.data);
 
                     const articleInfo = $('.arti_metas');

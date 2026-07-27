@@ -1,10 +1,11 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import InvalidParameterError from '@/errors/types/invalid-parameter';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import { isValidHost } from '@/utils/valid-host';
-import InvalidParameterError from '@/errors/types/invalid-parameter';
 
 export const route: Route = {
     path: '/:domain/tag/:tag',
@@ -41,11 +42,13 @@ async function handler(ctx) {
                 const $ = load(data);
 
                 $('.entry img').each((_, img) => {
-                    if (img.attribs['data-original'] || img.attribs['data-src']) {
-                        img.attribs.src = img.attribs['data-original'] || img.attribs['data-src'];
-                        delete img.attribs['data-original'];
-                        delete img.attribs['data-src'];
+                    if (!(img.attribs['data-original'] || img.attribs['data-src'])) {
+                        return;
                     }
+
+                    img.attribs.src = img.attribs['data-original'] || img.attribs['data-src'];
+                    delete img.attribs['data-original'];
+                    delete img.attribs['data-src'];
                 });
 
                 item.author = $('.author_name').text().trim();

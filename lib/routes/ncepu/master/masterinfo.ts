@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const title_map = {
     tzgg: '通知公告',
@@ -55,7 +56,7 @@ async function handler(ctx) {
             // 单篇文章块的信息，其中文字部分是标题，属性是文章链接
             const a = item.find('a');
             // 发表日期
-            const pubDate = timezone(parseDate(item.find('span').text().replace('[', '').replace(']', '')), +8);
+            const pubDate = timezone(parseDate(item.find('span').text().replace('[', '').replace(']', '')), 8);
             // 相对地址转化为绝对地址
             const url_head = `https://yjsy.ncepu.edu.cn/${url_map[type]}/`;
             const url_part = a.attr('href');

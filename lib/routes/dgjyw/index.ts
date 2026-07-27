@@ -1,10 +1,11 @@
-import { Route } from '@/types';
-import { getSubPath } from '@/utils/common-utils';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
+
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
+import { getSubPath } from '@/utils/common-utils';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '*',
@@ -19,13 +20,7 @@ async function handler(ctx) {
     const rootUrl = 'https://www.dgjyw.com';
     const currentUrl = `${rootUrl}${params === '/' ? '/tz' : params}.htm`;
 
-    const response = await got({
-        method: 'get',
-        url: currentUrl,
-        https: {
-            rejectUnauthorized: false,
-        },
-    });
+    const response = await got(currentUrl);
 
     const $ = load(response.data);
 
@@ -47,20 +42,14 @@ async function handler(ctx) {
         items.map((item) =>
             cache.tryGet(item.link, async () => {
                 if (/dgjyw\.com/.test(item.link)) {
-                    const detailResponse = await got({
-                        method: 'get',
-                        url: item.link,
-                        https: {
-                            rejectUnauthorized: false,
-                        },
-                    });
+                    const detailResponse = await got(item.link);
 
                     const content = load(detailResponse.data);
 
                     content('.cont-tit').remove();
                     content('.art-body').html(content('.v_news_content').html());
 
-                    item.pubDate = timezone(parseDate(content('meta[name="PubDate"]').attr('content')), +8);
+                    item.pubDate = timezone(parseDate(content('meta[name="PubDate"]').attr('content')), 8);
                     item.description = content('form[name="_newscontent_fromname"]').html();
                 }
 

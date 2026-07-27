@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -52,7 +53,7 @@ async function handler(ctx) {
             return {
                 title: a.attr('title'),
                 link: `${baseUrl}${a.attr('href')}`,
-                pubDate: timezone(parseDate(item.find('td').eq(4).text()), +8),
+                pubDate: timezone(parseDate(item.find('td').eq(4).text()), 8),
 
                 enclosure_url: item.find('td').eq(2).find('a').eq(1).attr('href'),
                 enclosure_length: Number.parseInt(size * (unit === 'GB' ? 1024 * 1024 * 1024 : 1024 * 1024)),

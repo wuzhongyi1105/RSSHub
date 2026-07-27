@@ -1,5 +1,6 @@
-import { describe, expect, it, vi, afterEach } from 'vitest';
 import Parser from 'rss-parser';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
+
 import wait from '@/utils/wait';
 
 process.env.CACHE_EXPIRE = '1';
@@ -144,8 +145,8 @@ describe('cache', () => {
         process.env.REDIS_URL = 'redis://wrongpath:6379';
         await noCacheTestFunc();
         const cache = (await import('@/utils/cache')).default;
-        await cache.clients.redisClient!.quit();
-    });
+        cache.clients.redisClient?.disconnect();
+    }, 20000);
 
     it('no cache', async () => {
         process.env.CACHE_TYPE = 'NO';
@@ -185,5 +186,59 @@ describe('cache', () => {
         const response = await app.request('/test/cache');
         const parsed = await parser.parseString(await response.text());
         expect(parsed.ttl).toEqual('10');
+    });
+});
+
+describe('cache middleware error handling', () => {
+    const setSpy = vi.fn(() => null);
+    const getSpy = vi.fn(() => null);
+
+    afterAll(() => {
+        vi.doUnmock('xxhash-wasm');
+        vi.doUnmock('@/utils/cache/index');
+        vi.resetModules();
+    });
+
+    it('clears control key when downstream throws', async () => {
+        vi.doMock('xxhash-wasm', () => ({
+            default: () =>
+                Promise.resolve({
+                    h64ToString: () => 'hash',
+                }),
+        }));
+        vi.doMock('@/utils/cache/index', () => ({
+            default: {
+                status: { available: true },
+                globalCache: {
+                    get: getSpy,
+                    set: setSpy,
+                    claim: vi.fn(() => true),
+                },
+            },
+        }));
+
+        const { default: cacheMiddleware } = await import('@/middleware/cache');
+
+        const ctx = {
+            req: {
+                path: '/test',
+                query: () => null,
+            },
+            res: {
+                headers: new Headers(),
+            },
+            status: vi.fn(),
+            header: vi.fn(),
+            set: vi.fn(),
+            get: vi.fn(),
+        };
+
+        await expect(
+            cacheMiddleware(ctx as any, () => {
+                throw new Error('boom');
+            })
+        ).rejects.toThrow('boom');
+
+        expect(setSpy.mock.calls.some(([, value]) => value === '0')).toBe(true);
     });
 });

@@ -1,10 +1,11 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
 import { load } from 'cheerio';
-import ofetch from '@/utils/ofetch';
+
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
 import logger from '@/utils/logger';
-import timezone from '@/utils/timezone';
+import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/topic/:id',
@@ -53,7 +54,7 @@ async function handler(ctx) {
         return {
             title: doc.title,
             link: `${baseLink}/${item.rid}`,
-            pubDate: timezone(parseDate(item.createdTime), +8),
+            pubDate: timezone(parseDate(item.createdTime), 8),
             author: doc.createdByName,
             category: doc.tags,
         };

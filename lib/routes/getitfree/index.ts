@@ -1,9 +1,10 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 
-import { apiSlug, rootUrl, bakeFilterSearchParams, bakeFiltersWithPair, bakeUrl, fetchData, getFilterNameForTitle, getFilterParamsForUrl, parseFilterStr } from './util';
+import { apiSlug, bakeFilterSearchParams, bakeFiltersWithPair, bakeUrl, fetchData, getFilterNameForTitle, getFilterParamsForUrl, parseFilterStr, rootUrl } from './util';
 
 export const route: Route = {
     path: '/:filter{.+}?',
@@ -14,7 +15,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const filter = ctx.req.param('filter');
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 50;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 50;
 
     const filters = parseFilterStr(filter);
     const filtersWithPair = await bakeFiltersWithPair(filters);
@@ -30,7 +31,7 @@ async function handler(ctx) {
 
     const { data: response } = await got(apiUrl);
 
-    const items = (Array.isArray(response) ? response : JSON.parse(response.match(/(\[.*])$/)[1])).slice(0, limit).map((item) => {
+    const items = (Array.isArray(response) ? response : JSON.parse(response.match(/(\[.*\])$/)[1])).slice(0, limit).map((item) => {
         const terminologies = item._embedded['wp:term'];
 
         const content = load(item.content?.rendered ?? item.content);

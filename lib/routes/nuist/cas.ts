@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -57,9 +58,8 @@ async function handler(ctx) {
     const items = await Promise.all(
         list.map((item) =>
             cache.tryGet(item.link, async () => {
-                let response;
                 try {
-                    response = await got(item.link);
+                    const response = await got(item.link);
                     const $ = load(response.data);
 
                     const authorMatch = $('.zzxx')
@@ -73,7 +73,7 @@ async function handler(ctx) {
                                 .text()
                                 .match(/发布时间:(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})/)[1]
                         ),
-                        +8
+                        8
                     );
                     item.description = $('#vsb_content').html();
                 } catch {

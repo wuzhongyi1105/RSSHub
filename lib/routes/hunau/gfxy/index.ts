@@ -1,5 +1,6 @@
-import { Route } from '@/types';
-import getContent from '../utils/common';
+import type { Route } from '@/types';
+
+import { getContent } from '../utils/common';
 
 export const route: Route = {
     path: '/gfxy/:category?/:page?',

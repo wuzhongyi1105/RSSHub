@@ -1,9 +1,10 @@
-import { DataItem, Route } from '@/types';
-import ofetch from '@/utils/ofetch';
 import { load } from 'cheerio';
+
+import type { DataItem, Route } from '@/types';
+import cache from '@/utils/cache';
+import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import cache from '@/utils/cache';
 
 export const route: Route = {
     path: '/announcement',
@@ -48,7 +49,7 @@ async function handler(): Promise<{ title: string; link: string; item: DataItem[
             return {
                 title: titleEle.text().trim(),
                 link: `${baseUrl}${titleEle.attr('href')}`,
-                pubDate: timezone(parseDate(dateEle.text(), 'YYYY-MM-DD'), +8),
+                pubDate: timezone(parseDate(dateEle.text(), 'YYYY-MM-DD'), 8),
             };
         });
 

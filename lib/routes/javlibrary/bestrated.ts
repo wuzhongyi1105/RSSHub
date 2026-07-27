@@ -1,6 +1,6 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
-import { defaultMode, defaultLanguage, rootUrl, ProcessItems } from './utils';
+import type { Route } from '@/types';
+
+import { defaultLanguage, defaultMode, ProcessItems, rootUrl } from './utils';
 
 export const route: Route = {
     path: ['/videos/bestrated/:language?/:mode?', '/bestrated/:language?/:mode?'],
@@ -10,6 +10,9 @@ export const route: Route = {
     description: `| Last Month | All Time |
 | ---------- | -------- |
 | 1          | 2        |`,
+    features: {
+        nsfw: true,
+    },
 };
 
 async function handler(ctx) {
@@ -17,5 +20,5 @@ async function handler(ctx) {
     const language = ctx.req.param('language') ?? defaultLanguage;
     const currentUrl = `${rootUrl}/${language}/vl_bestrated.php?list&mode=${mode}`;
 
-    return await ProcessItems(language, currentUrl, cache.tryGet);
+    return await ProcessItems(language, currentUrl);
 }

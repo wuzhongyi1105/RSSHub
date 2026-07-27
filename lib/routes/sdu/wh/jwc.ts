@@ -1,11 +1,13 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import data from '../data';
-import extractor from '../extractor';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
+
+import data from '../data';
+import extractor from '../extractor';
 
 export const route: Route = {
     path: '/wh/jwc/:column?',
@@ -46,7 +48,7 @@ async function handler(ctx) {
             const title = item.text();
             const { description, author: exactAuthor, exactDate } = await cache.tryGet(link, () => extractor(link));
             const author = exactAuthor ?? '教务处';
-            const pubDate = exactDate ?? timezone(parseDate(dateText.slice(1, -1), 'YYYY-MM-DD'), +8);
+            const pubDate = exactDate ?? timezone(parseDate(dateText.slice(1, -1), 'YYYY-MM-DD'), 8);
             return {
                 title,
                 link,

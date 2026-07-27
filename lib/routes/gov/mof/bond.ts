@@ -1,15 +1,16 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const domain = 'gks.mof.gov.cn';
 const theme = 'guozaiguanli';
 
 export const route: Route = {
-    path: '/mof/bond/:category?',
+    path: '/bond/:category?',
     categories: ['government'],
     example: '/gov/mof/bond',
     parameters: { category: '专题，见下表，默认为国债管理工作动态' },
@@ -50,7 +51,7 @@ async function handler(ctx) {
             return {
                 title: a.prop('title'),
                 link,
-                pubDate: timezone(parseDate(pubDate), +8),
+                pubDate: timezone(parseDate(pubDate), 8),
             };
         });
 

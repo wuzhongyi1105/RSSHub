@@ -1,8 +1,9 @@
+import { load } from 'cheerio';
+
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const getAritlces = async (category, url, cache) => {
     const { data } = await got(url);
@@ -18,7 +19,7 @@ const getAritlces = async (category, url, cache) => {
             return {
                 title: a.text(),
                 link,
-                pubDate: timezone(parseDate(item.find('span.time').text()), +8),
+                pubDate: timezone(parseDate(item.find('span.time').text()), 8),
                 category,
             };
         })
@@ -38,7 +39,7 @@ const getAritlces = async (category, url, cache) => {
 };
 
 const getItemsFromURLs = async (URLs, cache) => {
-    let items = Object.keys(URLs).map((key) => getAritlces(key, URLs[key], cache));
+    let items = Object.entries(URLs).map(([key, value]) => getAritlces(key, value, cache));
     items = await Promise.all(items);
     items = items.flat();
     return items;

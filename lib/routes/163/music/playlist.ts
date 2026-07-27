@@ -1,9 +1,8 @@
-import { Route } from '@/types';
-
-import got from '@/utils/got';
 import { config } from '@/config';
-import { art } from '@/utils/render';
-import path from 'node:path';
+import type { Route } from '@/types';
+import got from '@/utils/got';
+
+import { renderPlaylistDescription } from '../templates/music/playlist';
 
 export const route: Route = {
     path: '/music/playlist/:id',
@@ -20,10 +19,17 @@ export const route: Route = {
         ],
         requirePuppeteer: false,
         antiCrawler: true,
+        supportRadar: true,
         supportBT: false,
         supportPodcast: false,
         supportScihub: false,
     },
+    radar: [
+        {
+            source: ['music.163.com/playlist'],
+            target: '/music/playlist/:id',
+        },
+    ],
     name: '歌单歌曲',
     maintainers: ['DIYgod'],
     handler,
@@ -56,10 +62,13 @@ async function handler(ctx) {
         description: `网易云音乐歌单 - ${data.name}`,
         item: data.trackIds.slice(0, 201).map((item) => {
             const thisSong = songs.find((element) => element.id === item.id);
-            const singer = thisSong.artists.length === 1 ? thisSong.artists[0].name : thisSong.artists.reduce((prev, cur) => (prev.name || prev) + '/' + cur.name);
+            let singer = thisSong.artists[0].name;
+            for (const artist of thisSong.artists.slice(1)) {
+                singer += '/' + artist.name;
+            }
             return {
                 title: `${thisSong.name} - ${singer}`,
-                description: art(path.join(__dirname, '../templates/music/playlist.art'), {
+                description: renderPlaylistDescription({
                     singer,
                     album: thisSong.album.name,
                     date: new Date(thisSong.album.publishTime).toLocaleDateString(),

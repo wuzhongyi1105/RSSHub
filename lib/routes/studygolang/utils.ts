@@ -1,9 +1,11 @@
+import { load } from 'cheerio';
+import MarkdownIt from 'markdown-it';
+
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
-import MarkdownIt from 'markdown-it';
+import timezone from '@/utils/timezone';
+
 const md = MarkdownIt({
     html: true,
     linkify: true,
@@ -53,7 +55,7 @@ const FetchGoItems = async (ctx, rewriteId) => {
 
                 const content = load(detailResponse.data);
 
-                item.pubDate = timezone(parseDate(content('.timeago').first().attr('title')), +8);
+                item.pubDate = timezone(parseDate(content('.timeago').first().attr('title')), 8);
 
                 try {
                     item.description = md.render(content('.content').html());

@@ -1,9 +1,10 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import InvalidParameterError from '@/errors/types/invalid-parameter';
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import InvalidParameterError from '@/errors/types/invalid-parameter';
 
 const config = {
     tzgg: {
@@ -13,7 +14,7 @@ const config = {
 };
 
 export const route: Route = {
-    path: '/shenzhen/zjj/xxgk/:caty',
+    path: '/zjj/xxgk/:caty',
     categories: ['government'],
     example: '/gov/shenzhen/zjj/xxgk/tzgg',
     parameters: { caty: '信息类别' },
@@ -30,7 +31,7 @@ export const route: Route = {
             source: ['zjj.sz.gov.cn/xxgk/:caty'],
         },
     ],
-    name: '深圳市住房和建设局',
+    name: '住房和建设局',
     maintainers: ['lonn'],
     handler,
     description: `| 通知公告 |

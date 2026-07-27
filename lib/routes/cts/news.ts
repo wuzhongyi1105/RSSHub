@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+import pMap from 'p-map';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
-import pMap from 'p-map';
 
 export const route: Route = {
     path: '/:category',
@@ -36,8 +37,9 @@ async function handler(ctx) {
     const currentUrl = `https://news.cts.com.tw/${category}/index.html`;
     const response = await got(currentUrl);
     const $ = load(response.data);
+    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit')) : 20;
     const items = await pMap(
-        $('#newslist-top a[title]').slice(0, ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit')) : 20),
+        $('#newslist-top a[title]').slice(0, limit),
         (item) => {
             item = $(item);
             const link = item.attr('href');

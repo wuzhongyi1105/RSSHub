@@ -1,7 +1,8 @@
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
 import iconv from 'iconv-lite';
+
+import cache from '@/utils/cache';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -59,7 +60,7 @@ export default {
                         title: el.text(),
                         author: pubInfo[0].trim(),
                         description: description.html(),
-                        pubDate: timezone(parseDate(pubInfo[1]?.trim()), +8),
+                        pubDate: timezone(parseDate(pubInfo[1]?.trim()), 8),
                         link: url,
                     };
                     return single;

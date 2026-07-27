@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/:id?',
@@ -55,7 +56,7 @@ async function handler(ctx) {
 
     response = await got({
         method: 'get',
-        url: `${currentUrl}/${id ? response.data.match(/URL=(.*)"/)[1].replace(/node_\d+\.htm$/, `node_20${id}.htm`) : response.data.match(/URL=(.*)"/)[1]}`,
+        url: `${currentUrl}/${id ? response.data.match(/URL=(.*)"/)[1].replace(/node_\d+\.htm$/, () => `node_20${id}.htm`) : response.data.match(/URL=(.*)"/)[1]}`,
     });
 
     const $ = load(response.data);
@@ -110,7 +111,7 @@ async function handler(ctx) {
                     link: item,
                     title: content('.font01').text(),
                     description: content('#ozoom').html(),
-                    pubDate: timezone(parseDate(matches[1], 'YYYY-MM/DD'), +8),
+                    pubDate: timezone(parseDate(matches[1], 'YYYY-MM/DD'), 8),
                 };
             })
         )

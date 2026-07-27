@@ -1,7 +1,9 @@
-import { Route, ViewType } from '@/types';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import got from '@/utils/got';
+
 import { parseItem } from './utils';
 
 export const route: Route = {
@@ -40,7 +42,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const type = ctx.req.param('type') === 'week' ? 1 : 0;
-    const baseUrl = `https://www.gelonghui.com`;
+    const baseUrl = 'https://www.gelonghui.com';
     const { data: response } = await got(baseUrl);
     const $ = load(response);
 
@@ -57,7 +59,7 @@ async function handler(ctx) {
             };
         });
 
-    const items = await Promise.all(list.map((item) => parseItem(item, cache.tryGet)));
+    const items = await Promise.all(list.map((item) => parseItem(item)));
 
     return {
         title: `最热文章 - ${type === 0 ? '日排行' : '周排行'} - 格隆汇`,

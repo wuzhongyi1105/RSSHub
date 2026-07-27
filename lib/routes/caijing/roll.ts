@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -41,7 +42,7 @@ async function handler() {
     const list = response.data.map((item) => ({
         title: item.title,
         link: item.url.replace('http://', 'https://'),
-        pubDate: timezone(parseDate(item.published, 'MM-DD HH:mm'), +8),
+        pubDate: timezone(parseDate(item.published, 'MM-DD HH:mm'), 8),
         category: item.cat,
     }));
 

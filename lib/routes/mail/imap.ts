@@ -1,11 +1,12 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
 import { ImapFlow } from 'imapflow';
-import { config } from '@/config';
 import { simpleParser } from 'mailparser';
+
+import { config } from '@/config';
+import ConfigNotFoundError from '@/errors/types/config-not-found';
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
 import logger from '@/utils/logger';
 import { parseDate } from '@/utils/parse-date';
-import ConfigNotFoundError from '@/errors/types/config-not-found';
 
 export const route: Route = {
     path: '/imap/:email/:folder{.+}?',
@@ -47,7 +48,7 @@ async function handler(ctx) {
     try {
         await client.connect();
     } catch (error) {
-        throw new Error(error.responseText);
+        throw new Error(error.responseText, { cause: error });
     }
 
     /**
@@ -67,7 +68,8 @@ async function handler(ctx) {
     const mails = [];
     const lock = await client.getMailboxLock(folder);
     try {
-        for await (const message of client.fetch(`${Math.max(client.mailbox.exists - limit + 1, 1)}:*`, { envelope: true, source: true, uid: true })) {
+        const messages = client.fetch(`${Math.max(client.mailbox.exists - limit + 1, 1)}:*`, { envelope: true, source: true, uid: true });
+        for await (const message of messages) {
             mails.push(message);
         }
     } finally {
@@ -102,7 +104,7 @@ async function handler(ctx) {
 
     return {
         title: `${email}'s Inbox${folder === 'INBOX' ? '' : ` - ${folder}`}`,
-        link: `https://${email.split('@')[1]}`,
+        link: `https://${email.split('@', 2)[1]}`,
         item: items,
         allowEmpty: true,
     };

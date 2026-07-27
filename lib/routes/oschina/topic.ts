@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate, parseRelativeDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import { load } from 'cheerio';
 
 async function loadContent(link) {
     const res = await got(link);
@@ -50,7 +51,7 @@ async function handler(ctx) {
                 description: item.find('.description').html(),
                 link: item.find('.header').attr('href'),
                 author: item.find('.extra > .list > .item:nth-of-type(1)').text(),
-                pubDate: timezone(/\//.test(date) ? parseDate(date, ['YYYY/MM/DD HH:mm', 'MM/DD HH:mm']) : parseRelativeDate(date), +8),
+                pubDate: timezone(/\//.test(date) ? parseDate(date, ['YYYY/MM/DD HH:mm', 'MM/DD HH:mm']) : parseRelativeDate(date), 8),
             };
         });
 

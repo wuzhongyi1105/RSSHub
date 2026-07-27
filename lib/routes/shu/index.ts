@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio'; // cheerio@1.0.0
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio'; // cheerio@1.0.0
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -34,8 +35,8 @@ export const route: Route = {
     handler,
     url: 'www.shu.edu.cn/',
     description: `| 通知公告 | 重要新闻 |
-| -------- | --------- |
-| tzgg     | zyxw      |`,
+| -------- | -------- |
+| tzgg     | zyxw     |`,
 };
 
 async function handler(ctx) {
@@ -64,7 +65,7 @@ async function handler(ctx) {
             return {
                 title: item.find('p.bt').text().trim(),
                 link: rawLink ? new URL(rawLink, rootUrl).href : rootUrl,
-                pubDate: timezone(parseDate(item.find('p.sj').text().trim(), 'YYYY.MM.DD'), +8),
+                pubDate: timezone(parseDate(item.find('p.sj').text().trim(), 'YYYY.MM.DD'), 8),
                 description: item.find('p.zy').text().trim(),
             };
         });

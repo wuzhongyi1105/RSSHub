@@ -1,8 +1,9 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/search/:keyword?',
@@ -52,7 +53,7 @@ async function handler(ctx) {
                 title: a.text(),
                 link: new URL(a.attr('href'), rootUrl).href,
                 description: item.find('div.media-body pre').text(),
-                pubDate: timezone(parseDate(item.parent().parent().find('td').first().text(), 'YYYY年M月D日 HH:mm'), +8),
+                pubDate: timezone(parseDate(item.parent().parent().find('td').first().text(), 'YYYY年M月D日 HH:mm'), 8),
                 category: item
                     .parent()
                     .parent()

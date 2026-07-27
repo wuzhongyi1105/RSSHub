@@ -1,8 +1,10 @@
+import { load } from 'cheerio';
+
 import { config } from '@/config';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import timezone from '@/utils/timezone';
-import { load } from 'cheerio';
+
 import { baseUrl } from '.';
 
 export async function fetchArticles(data) {
@@ -24,7 +26,7 @@ export async function fetchArticles(data) {
                 return {
                     title: subject,
                     description: $('div.nfzm-content__content').html() ?? '',
-                    pubDate: timezone(publish_time, +8).toUTCString(),
+                    pubDate: timezone(publish_time, 8).toUTCString(),
                     link,
                     author,
                 };

@@ -1,10 +1,11 @@
-import { Route } from '@/types';
-import { getSubPath } from '@/utils/common-utils';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
+
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
+import { getSubPath } from '@/utils/common-utils';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/dongke/*',
@@ -14,7 +15,7 @@ export const route: Route = {
 };
 
 async function handler(ctx) {
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 10;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 10;
 
     const rootUrl = 'https://dongke.yangtzeu.edu.cn';
     const currentUrl = new URL(`${getSubPath(ctx).replace(/^\/dongke/, '') || '/yqzl/xyxw'}.htm`, rootUrl).href;
@@ -51,7 +52,7 @@ async function handler(ctx) {
                             .text()
                             .match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)[1]
                     ),
-                    +8
+                    8
                 );
 
                 return item;

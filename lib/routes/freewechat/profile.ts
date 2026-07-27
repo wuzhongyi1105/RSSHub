@@ -1,11 +1,13 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import { config } from '@/config';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 import { fixArticleContent } from '@/utils/wechat-mp';
-import { config } from '@/config';
+
 const baseUrl = 'https://freewechat.com';
 
 export const route: Route = {
@@ -79,7 +81,7 @@ async function handler(ctx) {
                 });
 
                 item.description = fixArticleContent($('#js_content'));
-                item.pubDate = timezone(parseDate($('#publish_time').text()), +8);
+                item.pubDate = timezone(parseDate($('#publish_time').text()), 8);
                 return item;
             })
         )

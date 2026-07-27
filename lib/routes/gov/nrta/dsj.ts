@@ -1,12 +1,13 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
 import pMap from 'p-map';
 
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
+import got from '@/utils/got';
+import { parseDate } from '@/utils/parse-date';
+
 export const route: Route = {
-    path: '/nrta/dsj/:category?',
+    path: '/dsj/:category?',
     categories: ['government'],
     example: '/gov/nrta/dsj',
     parameters: { category: '分类，见下表，默认为备案公示' },
@@ -28,7 +29,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const { category = 'note' } = ctx.req.param();
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 15;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 15;
 
     const rootUrl = 'https://dsj.nrta.gov.cn';
     const currentUrl = new URL(`tims/site/views/applications.shanty?appName=${category}`, rootUrl).href;

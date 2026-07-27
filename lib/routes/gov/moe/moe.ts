@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import logger from '@/utils/logger';
 import { parseDate } from '@/utils/parse-date';
 
@@ -15,7 +16,7 @@ const typesIdMap = [
 ];
 
 export const route: Route = {
-    path: '/moe/:type',
+    path: '/:type',
     categories: ['government'],
     example: '/gov/moe/policy_anal',
     parameters: { type: '分类名' },
@@ -32,7 +33,7 @@ export const route: Route = {
     handler,
     description: `|   政策解读   |   最新文件   | 公告公示 |      教育部简报     |     教育要闻     |
 | :----------: | :----------: | :------: | :-----------------: | :--------------: |
-| policy\_anal | newest\_file |  notice  | edu\_ministry\_news | edu\_focus\_news |`,
+| policy\\_anal | newest\\_file |  notice  | edu\\_ministry\\_news | edu\\_focus\\_news |`,
 };
 
 async function handler(ctx) {
@@ -41,10 +42,12 @@ async function handler(ctx) {
     let name = '';
 
     for (const item of typesIdMap) {
-        if (item.type === type) {
-            id = item.id;
-            name = item.name;
+        if (item.type !== type) {
+            continue;
         }
+
+        id = item.id;
+        name = item.name;
     }
 
     if (id === '') {

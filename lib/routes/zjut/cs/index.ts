@@ -1,8 +1,9 @@
-import { Data, Route } from '@/types';
-import cache from '@/utils/cache';
-import { parseDate } from '@/utils/parse-date';
 import { load } from 'cheerio';
+
+import type { Data, Route } from '@/types';
+import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
+import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
 const rootUrl = 'https://cs.zjut.edu.cn/jsp/newsclass.jsp?wcId=';
@@ -32,8 +33,8 @@ export const route: Route = {
         },
     ],
     description: `| 新闻资讯 | 学术动态 | 通知公告 |
-| ------- | ------- | ------- |
-| 54      | 55      | 53      |`,
+| -------- | -------- | -------- |
+| 54       | 55       | 53       |`,
 };
 
 async function handler(ctx) {
@@ -55,7 +56,7 @@ async function handler(ctx) {
                 } else if (!link.startsWith('http')) {
                     link = 'https://' + host + '/jsp/' + link;
                 }
-                const pubDate = timezone(parseDate(cheerioItem.find('.datetime').text().slice(1, -1)), +8);
+                const pubDate = timezone(parseDate(cheerioItem.find('.datetime').text().slice(1, -1)), 8);
 
                 return {
                     title,

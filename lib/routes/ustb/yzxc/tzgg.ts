@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 
 const host = 'https://yzxc.ustb.edu.cn';
@@ -46,7 +47,7 @@ async function handler() {
             if (path.startsWith('http')) {
                 itemUrl = path;
             } else if (path.startsWith('..')) {
-                itemUrl = path.replaceAll('..', host);
+                itemUrl = path.replaceAll('..', () => host);
             } else {
                 itemUrl = host + path;
             }

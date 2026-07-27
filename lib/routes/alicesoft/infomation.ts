@@ -1,7 +1,8 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
-import cache from '@/utils/cache';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
+import got from '@/utils/got';
 
 const baseUrl = 'https://www.alicesoft.com';
 
@@ -35,7 +36,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const { category, game } = ctx.req.param();
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 10;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 10;
 
     let url = `${baseUrl}/information`;
     if (category) {

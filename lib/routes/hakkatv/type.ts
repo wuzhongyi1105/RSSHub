@@ -1,4 +1,4 @@
-import { Route } from '@/types';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
@@ -66,7 +66,7 @@ async function handler(ctx) {
 
     const list = allData.flat().map((item) => ({
         title: item.title,
-        pubDate: timezone(parseDate(item.created_at), +8),
+        pubDate: timezone(parseDate(item.created_at), 8),
         author: item.author,
         link: `${baseUrl}/news-detail/${item.id}`,
         id: item.id,

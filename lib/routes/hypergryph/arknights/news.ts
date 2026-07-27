@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import { config } from '@/config';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
-import * as cheerio from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
-import { config } from '@/config';
 
 type NewsItem = {
     cid: string;
@@ -67,8 +68,7 @@ export const route: Route = {
     maintainers: ['Astrian'],
     handler,
     url: 'ak-conf.hypergryph.com/news',
-    description: `
-| 全部 | 最新   | 公告         | 活动     | 新闻 |
+    description: `| 全部 | 最新   | 公告         | 活动     | 新闻 |
 | ---- | ------ | ------------ | -------- | ---- |
 | ALL  | LATEST | ANNOUNCEMENT | ACTIVITY | NEWS |`,
 };
@@ -80,7 +80,7 @@ async function handler(ctx) {
         'hypergryph:arknights:news',
         async () => {
             const response = await ofetch('https://ak.hypergryph.com/news');
-            const $ = cheerio.load(response);
+            const $ = load(response);
             const renderData = JSON.parse(
                 $('script:contains("initialData")')
                     .first()
@@ -99,7 +99,7 @@ async function handler(ctx) {
         list.map((item) =>
             cache.tryGet(item.link, async () => {
                 const response = await ofetch(item.link);
-                const $ = cheerio.load(response);
+                const $ = load(response);
 
                 const description = $('div > div > div > div > div > div > div:nth-child(4)');
                 item.description = description.length ? description.html() : item.description;

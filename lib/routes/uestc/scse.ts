@@ -1,8 +1,9 @@
-import { Route } from '@/types';
 import { load } from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
 import dayjs from 'dayjs';
-import puppeteer from '@/utils/puppeteer';
+
+import type { Route } from '@/types';
+import { parseDate } from '@/utils/parse-date';
+import playwright from '@/utils/playwright';
 
 const baseIndexUrl = 'https://www.scse.uestc.edu.cn/index.htm';
 const host = 'https://www.scse.uestc.edu.cn/';
@@ -45,17 +46,17 @@ export const route: Route = {
 };
 
 async function handler() {
-    const browser = await puppeteer();
-    const page = await browser.newPage();
-    await page.setRequestInterception(true);
-    page.on('request', (request) => {
-        request.resourceType() === 'document' || request.resourceType() === 'script' ? request.continue() : request.abort();
+    const context = await playwright();
+    const page = await context.newPage();
+    await page.route('**/*', (route) => {
+        const request = route.request();
+        request.resourceType() === 'document' || request.resourceType() === 'script' ? route.continue() : route.abort();
     });
     await page.goto(baseIndexUrl, {
-        waitUntil: 'networkidle2',
+        waitUntil: 'networkidle',
     });
     const content = await page.content();
-    await browser.close();
+    await context.close();
 
     const $ = load(content);
 
@@ -93,10 +94,12 @@ async function handler() {
 
             let prefix = '【其他】';
             for (const code in prefixes) {
-                if (newsLink.search('info/' + code) !== -1) {
-                    prefix = prefixes[code];
-                    break;
+                if (newsLink.search('info/' + code) === -1) {
+                    continue;
                 }
+
+                prefix = prefixes[code];
+                break;
             }
             newsTitle = prefix + newsTitle;
 

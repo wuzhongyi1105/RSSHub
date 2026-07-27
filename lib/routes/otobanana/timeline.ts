@@ -1,6 +1,6 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
+import type { Route } from '@/types';
 import got from '@/utils/got';
+
 import { apiBase, baseUrl, getUserInfo, renderPost } from './utils';
 
 export const route: Route = {
@@ -29,7 +29,7 @@ export const route: Route = {
 async function handler(ctx) {
     const id = ctx.req.param('id');
 
-    const userInfo = await getUserInfo(id, cache.tryGet);
+    const userInfo = await getUserInfo(id);
     const { data: postData } = await got(`${apiBase}/users/${id}/posts/`);
 
     const posts = postData.results.map((item) => renderPost(item));

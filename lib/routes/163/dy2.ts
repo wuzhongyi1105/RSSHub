@@ -1,9 +1,10 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
+
 import { parseDyArticle } from './utils';
 
 export const route: Route = {
@@ -47,7 +48,7 @@ async function handler(ctx) {
             };
         });
 
-    const items = await Promise.all(list.map((item) => parseDyArticle(item, cache.tryGet)));
+    const items = await Promise.all(list.map((item) => parseDyArticle(item)));
 
     return {
         title: `${$('head title').text()} - 网易号`,

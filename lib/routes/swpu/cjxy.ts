@@ -1,8 +1,9 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
-import { parseDate } from '@/utils/parse-date';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
 import got from '@/utils/got';
+import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
 export const route: Route = {
@@ -46,8 +47,8 @@ async function handler(ctx) {
         .toArray()
         .map((elem) => ({
             title: $('a[href]', elem).text().trim(),
-            pubDate: timezone(parseDate($('span', elem).text(), 'YYYY年MM月DD日'), +8),
-            link: `https://www.swpu.edu.cn/nccjxy/${$('a[href]', elem).attr('href').split('../')[1]}`,
+            pubDate: timezone(parseDate($('span', elem).text(), 'YYYY年MM月DD日'), 8),
+            link: `https://www.swpu.edu.cn/nccjxy/${$('a[href]', elem).attr('href').split('../', 2)[1]}`,
         }));
 
     const out = await Promise.all(
@@ -62,10 +63,12 @@ async function handler(ctx) {
                     item.author = '财经学院';
                     item.description = $('.v_news_content').html();
                     for (const elem of $('.v_news_content p')) {
-                        if ($(elem).css('text-align') === 'right') {
-                            item.author = $(elem).text();
-                            break;
+                        if ($(elem).css('text-align') !== 'right') {
+                            continue;
                         }
+
+                        item.author = $(elem).text();
+                        break;
                     }
                 }
                 return item;

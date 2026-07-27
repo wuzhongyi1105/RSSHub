@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -57,12 +58,12 @@ async function handler(ctx) {
                     const $ = load(response.data);
 
                     const info = $('#show_info').text().split(/\s{4}/);
-                    const date = info[0].split('：')[1];
+                    const date = info[0].split('：', 2)[1];
 
                     item.title = $('#show_title').text().trim();
                     item.author = info[1].replace('编辑：', '') || '山东大学能源与动力工程学院';
                     item.description = $('#show_content').html();
-                    item.pubDate = timezone(parseDate(date), +8);
+                    item.pubDate = timezone(parseDate(date), 8);
 
                     return item;
                 });

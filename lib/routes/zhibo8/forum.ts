@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -52,7 +53,7 @@ async function handler(ctx) {
                     description,
                     author,
                     link,
-                    pubDate: timezone(parseDate(date, 'YYYY-MM-DD HH:mm'), +8),
+                    pubDate: timezone(parseDate(date, 'YYYY-MM-DD HH:mm'), 8),
                 };
             });
         })

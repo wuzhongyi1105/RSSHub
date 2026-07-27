@@ -1,8 +1,9 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/',
@@ -24,7 +25,7 @@ async function handler() {
                 title: item.find('.index-header').text(),
                 link: item.find('.index-header').children('a').attr('href'),
                 description: item.find('.index-excerpt.index-excerpt__noimg').children('div').text(),
-                pubDate: timezone(parseDate(item.find('.post-meta.mr-3').children('time').attr('datetime'), 'YYYY年MM月DD日 HH:mm'), +8),
+                pubDate: timezone(parseDate(item.find('.post-meta.mr-3').children('time').attr('datetime'), 'YYYY年MM月DD日 HH:mm'), 8),
             };
         });
 

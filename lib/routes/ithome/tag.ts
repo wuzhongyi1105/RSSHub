@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const rootUrl = 'https://www.ithome.com/';
 
@@ -41,7 +42,7 @@ async function handler(ctx) {
         .map((item) => ({
             title: $(item).find('h2 > a').text(),
             link: $(item).find('h2 > a').attr('href'),
-            pubDate: timezone(parseDate($(item).find('div.c').attr('data-ot')), +8),
+            pubDate: timezone(parseDate($(item).find('div.c').attr('data-ot')), 8),
         }));
 
     const items = await Promise.all(

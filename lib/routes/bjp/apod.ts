@@ -1,6 +1,8 @@
-import { Route, ViewType } from '@/types';
-import cache from '@/utils/cache';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
@@ -48,8 +50,8 @@ async function handler(ctx) {
                 pubDate: timezone(parseDate(e.find('span').text().replace('：', ''), 'YYYY-MM-DD'), 8),
             };
         })
-        .sort((a, b) => b.pubDate - a.pubDate)
-        .slice(0, ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 10);
+        .toSorted((a, b) => b.pubDate - a.pubDate)
+        .slice(0, ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 10);
 
     const items = await Promise.all(
         list.map((e) =>

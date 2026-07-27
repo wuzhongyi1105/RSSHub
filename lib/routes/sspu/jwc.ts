@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -43,7 +44,7 @@ async function handler(ctx) {
                 const $ = load(response);
 
                 item.description = $('.wp_articlecontent').html();
-                item.pubDate = timezone(parseDate($('.arti_update').text(), 'YYYY-MM-DD HH:mm:ss'), +8);
+                item.pubDate = timezone(parseDate($('.arti_update').text(), 'YYYY-MM-DD HH:mm:ss'), 8);
 
                 return item;
             })

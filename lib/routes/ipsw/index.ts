@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 
 const host = 'https://ipsw.me/';
 
@@ -20,7 +21,7 @@ export const route: Route = {
 
 function replaceurl(e) {
     e = e.replace("';", '');
-    e = e.replace("window.location = '/", host);
+    e = e.replace("window.location = '/", () => host);
     return e;
 }
 

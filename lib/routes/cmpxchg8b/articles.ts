@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 
 const baseUrl = 'https://lock.cmpxchg8b.com/';
 const title = 'cmpxchg8b';
@@ -41,7 +42,7 @@ async function handler() {
             item = $(item);
             return {
                 title: item.find('li').text(),
-                link: new URL(item.find('li a').attr('href'), baseUrl).toString(),
+                link: new URL(item.find('li a').attr('href'), baseUrl).href,
                 author,
             };
         });
@@ -63,7 +64,7 @@ async function handler() {
 
     return {
         title,
-        link: new URL('#articles', baseUrl).toString(),
+        link: new URL('#articles', baseUrl).href,
         item: items,
     };
 }

@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/headline',
@@ -48,7 +49,7 @@ async function handler() {
                 title: item.text(),
                 description: item.parent().next().html(),
                 link: `${rootUrl}${item.attr('href').replace(/\.shtml$/, '_s.shtml')}`,
-                pubDate: timezone(parseDate(item.parents('div').first().find('span').text()), +8),
+                pubDate: timezone(parseDate(item.parents('div').first().find('span').text()), 8),
             };
         });
 

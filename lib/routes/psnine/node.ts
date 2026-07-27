@@ -1,10 +1,10 @@
-import type { Route } from '@/types';
+import { load } from 'cheerio';
 
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
-import * as cheerio from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import cache from '@/utils/cache';
 
 const handler = async (ctx) => {
     const { id = 'news', order = 'obdate' } = ctx.req.param();
@@ -13,7 +13,7 @@ const handler = async (ctx) => {
     const currentUrl = `${rootUrl}/node/${id}?ob=${order}`;
     const response = await ofetch(currentUrl);
 
-    const $ = cheerio.load(response);
+    const $ = load(response);
 
     $('.psnnode, .node').remove();
 
@@ -32,7 +32,7 @@ const handler = async (ctx) => {
                             .filter((_, i) => i.nodeType === 3)
                             .text()
                             .trim()
-                            .split(/\s{2,}/)[0],
+                            .split(/\s{2,}/, 1)[0],
                         ['YYYY-MM-DD HH:mm', 'MM-DD HH:mm']
                     ),
                     8
@@ -44,7 +44,7 @@ const handler = async (ctx) => {
         list.map((item) =>
             cache.tryGet(item.link, async () => {
                 const detailResponse = await ofetch(item.link);
-                const $ = cheerio.load(detailResponse);
+                const $ = load(detailResponse);
 
                 item.author = $('a[itemprop="author"]').eq(0).text();
                 item.description = $('div[itemprop="articleBody"]').html();

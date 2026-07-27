@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/news/:site?/:id?/:keyword?',
@@ -75,11 +76,11 @@ async function handler(ctx) {
 
                         const content = load(detailResponse.data);
 
-                        const matches = detailResponse.data.match(/新闻来源:(.*?)于.*(\d{4}(?:-\d{2}){2} (?:\d{1,2}:){2}\d{1,2})/);
+                        const matches = detailResponse.data.match(/新闻来源:([^于]*)于.*(\d{4}(?:-\d{2}){2} (?:\d{1,2}:){2}\d{1,2})/);
 
                         item.title = content('h2').text();
                         item.author = matches[1].trim();
-                        item.pubDate = timezone(parseDate(matches[2], 'YYYY-MM-DD h:m'), +8);
+                        item.pubDate = timezone(parseDate(matches[2], 'YYYY-MM-DD h:m'), 8);
                         item.description = content('#shownewsc').html().replaceAll('<p></p>', '');
                     } catch {
                         // no-empty

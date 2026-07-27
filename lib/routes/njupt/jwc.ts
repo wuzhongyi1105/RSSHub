@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 
 const host = 'https://jwc.njupt.edu.cn';
@@ -83,22 +84,21 @@ async function handler(ctx) {
                         link: itemUrl,
                         description: $('.wp_articlecontent')
                             .html()
-                            .replaceAll('src="/', `src="${new URL('.', host).href}`)
-                            .replaceAll('href="/', `href="${new URL('.', host).href}`)
+                            .replaceAll('src="/', () => `src="${new URL('.', host).href}`)
+                            .replaceAll('href="/', () => `href="${new URL('.', host).href}`)
                             .trim(),
                         pubDate: parseDate($('.Article_PublishDate').text().replace('发布时间：', '')),
                     };
                     return single;
                 });
-            } else {
-                const single = {
-                    title: titleList[index],
-                    link: itemUrl,
-                    description: '该通知为文件，请点击原文链接↑下载',
-                    pubDate: parseDate(dateList[index]),
-                };
-                return single;
             }
+            const single = {
+                title: titleList[index],
+                link: itemUrl,
+                description: '该通知为文件，请点击原文链接↑下载',
+                pubDate: parseDate(dateList[index]),
+            };
+            return single;
         })
     );
     let info = '通知公告';

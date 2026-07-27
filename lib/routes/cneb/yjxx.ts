@@ -1,8 +1,8 @@
-import { Route } from '@/types';
+import type { Route } from '@/types';
 import { getSubPath } from '@/utils/common-utils';
 import got from '@/utils/got';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/yjxx/*',
@@ -54,7 +54,7 @@ async function handler(ctx) {
         link: item.docpuburl,
         author: item.chnlname,
         description: item.doccontent,
-        pubDate: timezone(parseDate(item.docpubtime), +8),
+        pubDate: timezone(parseDate(item.docpubtime), 8),
     }));
 
     return {

@@ -1,9 +1,11 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
+
 const baseUrl = 'https://www.cast.org.cn';
 
 async function parsePage(html: string) {
@@ -25,7 +27,7 @@ async function parsePage(html: string) {
                 return cache.tryGet(articleUrl, async () => {
                     const res = await got.get<string>(articleUrl!);
                     const article = load(res.data);
-                    const pubDate = timezone(parseDate(article('meta[name=PubDate]').attr('content')!, 'YYYY-MM-DD HH:mm'), +8);
+                    const pubDate = timezone(parseDate(article('meta[name=PubDate]').attr('content')!, 'YYYY-MM-DD HH:mm'), 8);
 
                     return {
                         title: title.text(),
@@ -61,7 +63,7 @@ export const route: Route = {
     maintainers: ['KarasuShin', 'TonyRL'],
     handler,
     description: `::: tip
-  在路由末尾处加上 \`?limit=限制获取数目\` 来限制获取条目数量，默认值为\`10\`
+在路由末尾处加上 \`?limit=限制获取数目\` 来限制获取条目数量，默认值为\`10\`
 :::
 
 | 分类     | 编码 |
@@ -86,7 +88,7 @@ async function handler(ctx) {
 
     const $ = load(indexData);
 
-    let items: any[] = [];
+    let items: DataItem[];
 
     // 新闻-视频首页特殊处理
     if (column === 'xw' && subColumn === 'SP' && !category) {
@@ -94,7 +96,7 @@ async function handler(ctx) {
     } else {
         const buildUnitScript = $('script[parseType="bulidstatic"]');
         const queryUrl = `${baseUrl}${buildUnitScript.attr('url')}`;
-        const queryData = JSON.parse(buildUnitScript.attr('querydata')?.replace(/'/g, '"') ?? '{}');
+        const queryData = JSON.parse(buildUnitScript.attr('querydata')?.replaceAll("'", '"') ?? '{}');
         queryData.paramJson = `{"pageNo":1,"pageSize":${limit}}`;
 
         const { data } = await got.get<{ data: { html: string } }>(queryUrl, {

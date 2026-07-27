@@ -1,4 +1,4 @@
-import { Route, Data } from '@/types';
+import type { Data, Route } from '@/types';
 import got from '@/utils/got';
 
 export const route: Route = {
@@ -63,7 +63,6 @@ async function handler(ctx): Promise<Data> {
             item: items,
             language: 'zh-cn',
         };
-    } else {
-        throw new Error(data.message);
     }
+    throw new Error(data.message);
 }

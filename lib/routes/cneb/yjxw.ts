@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const indexs = {
     gnxw: 0,
@@ -70,7 +71,7 @@ async function handler(ctx) {
             return {
                 title: a.text(),
                 link: a.attr('href'),
-                pubDate: timezone(parseDate(item.find('span').text()), +8),
+                pubDate: timezone(parseDate(item.find('span').text()), 8),
             };
         });
 

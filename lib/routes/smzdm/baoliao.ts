@@ -1,12 +1,14 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import { config } from '@/config';
+import ConfigNotFoundError from '@/errors/types/config-not-found';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import { config } from '@/config';
+
 import { getHeaders } from './utils';
-import ConfigNotFoundError from '@/errors/types/config-not-found';
 
 export const route: Route = {
     path: '/baoliao/:uid',
@@ -56,7 +58,7 @@ async function handler(ctx) {
             return {
                 title: item.find('.pandect-content-title a').text(),
                 link: item.find('.pandect-content-title a').attr('href'),
-                pubDate: timezone(parseDate(item.find('.pandect-content-time').text(), ['YYYY-MM-DD', 'MM-DD HH:mm']), +8),
+                pubDate: timezone(parseDate(item.find('.pandect-content-time').text(), ['YYYY-MM-DD', 'MM-DD HH:mm']), 8),
             };
         });
 

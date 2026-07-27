@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -52,7 +53,7 @@ async function handler() {
                 const detailData = await got.get(item.link);
                 const $ = load(detailData.data);
                 item.description = $('div.pdbox').html();
-                item.pubDate = timezone(parseDate($('div.newbox > div.newtit > p').text(), 'YYYY-MM-DD HH:mm:ss'), +8);
+                item.pubDate = timezone(parseDate($('div.newbox > div.newtit > p').text(), 'YYYY-MM-DD HH:mm:ss'), 8);
 
                 return item;
             })

@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const categories = {
     gjldrhd: 'gjldrhd_674881',
@@ -18,8 +19,8 @@ const categories = {
 };
 
 export const route: Route = {
-    path: ['/fmprc/:category?', '/mfa/wjdt/:category?'],
-    name: 'Unknown',
+    path: '/wjdt/:category?',
+    name: '外交动态',
     maintainers: ['nicolaszf', 'nczitzk'],
     handler,
     description: `| 分类       | category |
@@ -56,7 +57,7 @@ async function handler(ctx) {
 
             return {
                 title: item.text(),
-                link: item.attr('href').replace(/^\./, currentUrl),
+                link: item.attr('href').replace(/^\./, () => currentUrl),
             };
         });
 
@@ -71,7 +72,7 @@ async function handler(ctx) {
                 const content = load(detailResponse.data);
 
                 item.description = content('#News_Body_Txt_A').html();
-                item.pubDate = timezone(parseDate(content('.time span').last().text()), +8);
+                item.pubDate = timezone(parseDate(content('.time span').last().text()), 8);
                 item.category = content('meta[name="Keywords"]').attr('content')?.split(';') ?? [];
 
                 return item;

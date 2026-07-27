@@ -1,7 +1,10 @@
-import { Route, ViewType } from '@/types';
+import { load } from 'cheerio';
+import pMap from 'p-map';
+
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -52,7 +55,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const category = ctx.req.param('category');
-    let url = '';
+    let url: string;
     let categoryName = '';
     const categoryTable = {
         1: 'PC',
@@ -94,21 +97,15 @@ async function handler(ctx) {
     const list = $('div.BH-lbox.GN-lbox2')
         .children()
         .not('p,a,img,span')
+        // <div data-news-id="291265" id="291265"></div>
+        .not('[data-news-id]')
         .slice(0, limit)
         .toArray()
         .map((item) => {
             item = $(item);
-            let aLabelNode;
-            let tag;
-            // a label with div
-            if (item.find('h1').length === 0) {
-                // a label without div
-                aLabelNode = item.find('a');
-                tag = item.find('div.platform-tag_list').text();
-            } else {
-                aLabelNode = item.find('h1').find('a');
-                tag = item.find('div.platform-tag_list').text();
-            }
+            // a label with div / a label without div
+            const aLabelNode = item.find('h1').length === 0 ? item.find('a') : item.find('h1').find('a');
+            const tag = item.find('div.platform-tag_list').text();
 
             return {
                 title: '[' + tag + ']' + aLabelNode.text(),
@@ -116,11 +113,12 @@ async function handler(ctx) {
             };
         });
 
-    const items = await Promise.all(
-        list.map(async (item) => {
+    const items = await pMap(
+        list,
+        async (item) => {
             item.description = await cache.tryGet(item.link, async () => {
                 const response = await got.get(item.link);
-                let component = '';
+                let component: string;
                 const urlReg = /window\.lazySizesConfig/g;
 
                 let pubInfo;
@@ -158,12 +156,13 @@ async function handler(ctx) {
                         component = _$('div.text-paragraph').html();
                     }
                 }
-                item.pubDate = timezone(parseDate(dateStr, 'YYYY-MM-DD HH:mm:ss'), +8);
+                item.pubDate = timezone(parseDate(dateStr, 'YYYY-MM-DD HH:mm:ss'), 8);
                 component = component.replaceAll(/\b(data-src)\b/g, 'src');
                 return component;
             });
             return item;
-        })
+        },
+        { concurrency: 5 }
     );
 
     return {

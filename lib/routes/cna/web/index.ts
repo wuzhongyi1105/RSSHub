@@ -1,9 +1,11 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
+
 import { getFullText } from '../utils';
 
 export const route: Route = {
@@ -42,7 +44,7 @@ async function handler(ctx) {
             return {
                 title: item.text(),
                 link: new URL(item.parents('a').attr('href'), 'https://www.cna.com.tw').href,
-                pubDate: timezone(parseDate(item.next().text()), +8),
+                pubDate: timezone(parseDate(item.next().text()), 8),
             };
         });
 

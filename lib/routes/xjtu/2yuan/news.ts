@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/2yuan/news/:id?',
@@ -55,7 +56,7 @@ async function handler(ctx) {
             return {
                 title: item.find('a').attr('title'),
                 link: `${rootUrl}${item.find('a').attr('href')}`,
-                pubDate: timezone(parseDate(item.find('.dy_date').text()), +8),
+                pubDate: timezone(parseDate(item.find('.dy_date').text()), 8),
             };
         });
 
@@ -77,7 +78,7 @@ async function handler(ctx) {
                             .text()
                             .replace(/发布时间：/, '')
                     ),
-                    +8
+                    8
                 );
 
                 return item;

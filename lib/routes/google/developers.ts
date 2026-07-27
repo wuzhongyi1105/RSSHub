@@ -1,8 +1,9 @@
-import { Route } from '@/types';
-import ofetch from '@/utils/ofetch';
 import { load } from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
 import type { Context } from 'hono';
+
+import type { Route } from '@/types';
+import ofetch from '@/utils/ofetch';
+import { parseDate } from '@/utils/parse-date';
 
 const baseUrl = 'https://developers.googleblog.com';
 
@@ -47,7 +48,7 @@ async function handler(ctx: Context) {
         .toArray()
         .map((element) => {
             const dateCategory = $(element).find('.search-result__eyebrow').text().trim();
-            const [date, category] = dateCategory.split(' / ');
+            const [date, category] = dateCategory.split(' / ', 2);
             const titleElement = $(element).find('.search-result__title a');
             const title = titleElement.text().trim();
             const link = titleElement.attr('href');

@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const config = {
     sub: {
@@ -40,8 +41,8 @@ async function handler(ctx) {
 
     const $ = load(response.data);
 
-    $('.align-middle').each(function () {
-        $(this).removeClass('link-dark');
+    $('.align-middle').each((_, el) => {
+        $(el).removeClass('link-dark');
     });
 
     let items = $('.link-dark')
@@ -55,7 +56,7 @@ async function handler(ctx) {
             return {
                 link: `${rootUrl}${item.attr('href')}`,
                 author: item.parent().parent().find('.text-dark').last().text(),
-                pubDate: timezone(parseDate(pubDate.includes('-') ? pubDate : `${today} ${pubDate}`), +8),
+                pubDate: timezone(parseDate(pubDate.includes('-') ? pubDate : `${today} ${pubDate}`), 8),
                 title: `${item.parent().parent().find('.align-middle').text()} ${item.text().replace(/ - SubHD/, '')}`,
             };
         });

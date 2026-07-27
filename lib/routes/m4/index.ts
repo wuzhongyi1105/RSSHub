@@ -1,14 +1,14 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
 
+import InvalidParameterError from '@/errors/types/invalid-parameter';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { isValidHost } from '@/utils/valid-host';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
-import { art } from '@/utils/render';
-import path from 'node:path';
-import InvalidParameterError from '@/errors/types/invalid-parameter';
+import timezone from '@/utils/timezone';
+import { isValidHost } from '@/utils/valid-host';
+
+import { renderDescription } from './templates/description';
 
 export const route: Route = {
     path: '/:id?/:category{.+}?',
@@ -22,7 +22,7 @@ async function handler(ctx) {
     if (!isValidHost(id)) {
         throw new InvalidParameterError('Invalid id');
     }
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 30;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 30;
 
     const rootUrl = `http://${id}.m4.cn`;
     const currentUrl = new URL(category ? `/${category.replace(/\/$/, '')}/` : '/', rootUrl).href;
@@ -42,7 +42,7 @@ async function handler(ctx) {
             return {
                 title: a.text(),
                 link: a.prop('href'),
-                description: art(path.join(__dirname, 'templates/description.art'), {
+                description: renderDescription({
                     images: [
                         {
                             src: item.parent().find('div.aimg0 a img').prop('src'),
@@ -54,7 +54,7 @@ async function handler(ctx) {
                     .find('a.aclass')
                     .toArray()
                     .map((c) => $(c).text().replaceAll('[]', '').trim()),
-                pubDate: timezone(parseDate(item.find('span.atime').text()), +8),
+                pubDate: timezone(parseDate(item.find('span.atime').text()), 8),
             };
         });
 
@@ -66,15 +66,15 @@ async function handler(ctx) {
                 const content = load(detailResponse);
 
                 item.title = content('h1').first().text();
-                item.description = art(path.join(__dirname, 'templates/description.art'), {
+                item.description = renderDescription({
                     intro: content('div.aintro1, p.cont-summary').text(),
-                    description: content('div.content0, div.cont-detail').html(),
+                    description: content('div.content0, div.cont-detail').html() ?? undefined,
                 });
                 item.category = content('span.dd0 a, a[rel="category"]')
                     .toArray()
                     .map((c) => content(c).text())
                     .slice(1);
-                item.pubDate = timezone(parseDate(content('span.atime1, span.post-time').text()), +8);
+                item.pubDate = timezone(parseDate(content('span.atime1, span.post-time').text()), 8);
 
                 return item;
             })

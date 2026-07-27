@@ -1,8 +1,9 @@
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
-import { parseDate } from '@/utils/parse-date';
+
 import cache from '@/utils/cache';
+import got from '@/utils/got';
+import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 const domain = 'mydrivers.com';
 const rootUrl = `https://m.${domain}`;
@@ -100,14 +101,14 @@ const processItems = async (items) =>
                         .map((c) => content(c).contents().last().text().trim()),
                 ].filter(Boolean);
                 item.guid = `${domain}#${item.guid}`;
-                item.pubDate = item.pubDate ?? timezone(parseDate(content('li.writer').next().text().trim(), 'YYYY年MM月DD日 HH:mm'), +8);
-                item.upvotes = voteResponse.NewsSupport ? Number.parseInt(voteResponse.NewsSupport, 10) : 0;
-                item.downvotes = voteResponse.NewsOppose ? Number.parseInt(voteResponse.NewsOppose, 10) : 0;
-                item.comments = content('#tpinglun').text() ? Number.parseInt(content('#tpinglun').text(), 10) : 0;
+                item.pubDate ??= timezone(parseDate(content('li.writer').next().text().trim(), 'YYYY年MM月DD日 HH:mm'), 8);
+                item.upvotes = voteResponse.NewsSupport ? Number(voteResponse.NewsSupport) : 0;
+                item.downvotes = voteResponse.NewsOppose ? Number(voteResponse.NewsOppose) : 0;
+                item.comments = content('#tpinglun').text() ? Number(content('#tpinglun').text()) : 0;
 
                 return item;
             })
         )
     );
 
-export { rootUrl, rootRSSUrl, title, categories, convertToQueryString, getInfo, processItems };
+export { categories, convertToQueryString, getInfo, processItems, rootRSSUrl, rootUrl, title };

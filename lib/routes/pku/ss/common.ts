@@ -1,5 +1,7 @@
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import cache from '@/utils/cache';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 
 const baseUrl = 'https://www.ss.pku.edu.cn';
@@ -21,8 +23,8 @@ const getSingleRecord = async (url) => {
     });
 };
 
-const getArticle = (item, tryGet) =>
-    tryGet(item.link, async () => {
+const getArticle = (item) =>
+    cache.tryGet(item.link, async () => {
         const response = await got(item.link);
         const $ = load(response.data);
 
@@ -30,4 +32,4 @@ const getArticle = (item, tryGet) =>
         return item;
     });
 
-export { baseUrl, getSingleRecord, getArticle };
+export { baseUrl, getArticle, getSingleRecord };

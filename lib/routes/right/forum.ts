@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/forum/:id?',
@@ -37,8 +38,8 @@ async function handler(ctx) {
 
     const $ = load(response.data);
 
-    $('a[title="隐藏置顶帖"]').each(function () {
-        $(this).parents('tbody').remove();
+    $('a[title="隐藏置顶帖"]').each((_, el) => {
+        $(el).parents('tbody').remove();
     });
 
     let items = $('.s')
@@ -67,7 +68,7 @@ async function handler(ctx) {
 
                 item.author = content('.authi').first().text();
                 item.description = content('.t_f').first().html();
-                item.pubDate = timezone(parseDate(content('.authi em').first().text().replace('发表于 ', '')), +8);
+                item.pubDate = timezone(parseDate(content('.authi em').first().text().replace('发表于 ', '')), 8);
                 item.category = content('.ptg a')
                     .toArray()
                     .map((a) => content(a).text());

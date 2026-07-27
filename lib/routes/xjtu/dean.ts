@@ -1,7 +1,8 @@
-import { Route, Data, DataItem } from '@/types';
+import { load } from 'cheerio';
+
+import type { Data, DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -15,8 +16,8 @@ const parseContent = (htmlString) => {
         .map((element) => $(element).text().trim());
 
     const content = $('[id^="vsb_content"]');
-    $('form > div > ul a').each(function () {
-        $(this).appendTo(content);
+    $('form > div > ul a').each((_, el) => {
+        $(el).appendTo(content);
         $('<br>').appendTo(content);
     });
 
@@ -58,7 +59,7 @@ async function handler(ctx) {
             return {
                 title,
                 link,
-                pubDate: timezone(parseDate(item.find('span').text(), 'YYYY-MM-DD'), +8),
+                pubDate: timezone(parseDate(item.find('span').text(), 'YYYY-MM-DD'), 8),
             };
         });
 

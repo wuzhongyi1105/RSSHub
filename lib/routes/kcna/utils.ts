@@ -1,7 +1,8 @@
-import cache from '@/utils/cache';
-import { parseDate } from '@/utils/parse-date';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import cache from '@/utils/cache';
+import got from '@/utils/got';
+import { parseDate } from '@/utils/parse-date';
 
 const rootUrl = 'http://www.kcna.kp';
 
@@ -14,7 +15,7 @@ const parseJucheDate = (dateString) => {
     const dateMatch = dateString.match(/(\d+)\D(\d+)\D(\d+)/);
     const [jucheYear, month, day] = dateMatch ? dateMatch.slice(1) : [null, null, null];
     if (jucheYear && month && day) {
-        const year = Number.parseInt(jucheYear, 10) + 1911;
+        const year = Number(jucheYear) + 1911;
         return parseDate(`${year}-${month}-${day}`, 'YYYY-M-D');
     }
     return null;
@@ -53,8 +54,8 @@ const fetchVideo = (ctx, url) =>
         const $ = load(res.data);
         const js = $('script[type="text/javascript"]:not([src])').html();
         let sources = js.match(/<[^>]*source[^>]+src[^>]+>/g);
-        sources = sources && sources.map((item) => item.replaceAll("'", '"').replaceAll(/src="([^"]+)"/g, `src="${rootUrl}$1"`));
+        sources &&= sources.map((item) => item.replaceAll("'", '"').replaceAll(/src="([^"]+)"/g, (_match, p1) => `src="${rootUrl}${p1}"`));
         return `<video controls preload="metadata">${sources.join('\n')}</video>`;
     });
 
-export { parseJucheDate, fixDesc, fetchPhoto, fetchVideo };
+export { fetchPhoto, fetchVideo, fixDesc, parseJucheDate };

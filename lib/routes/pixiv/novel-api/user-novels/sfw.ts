@@ -1,8 +1,9 @@
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
+
 import pixivUtils from '../../utils';
 import { getSFWNovelContent } from '../content/sfw';
-import type { SFWNovelsResponse, NovelList } from './types';
+import type { NovelList, SFWNovelsResponse } from './types';
 
 const baseUrl = 'https://www.pixiv.net';
 
@@ -15,8 +16,8 @@ export async function getSFWUserNovels(id: string, fullContent: boolean = false,
     });
 
     const novels = Object.keys(allData.body.novels)
-        .sort((a, b) => Number(b) - Number(a))
-        .slice(0, Number.parseInt(String(limit), 10));
+        .toSorted((a, b) => Number(b) - Number(a))
+        .slice(0, Number(String(limit)));
 
     if (novels.length === 0) {
         throw new Error('No novels found for this user, or is an R18 creator, fallback to ConfigNotFoundError');

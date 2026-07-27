@@ -1,5 +1,6 @@
-import { Route } from '@/types';
-import fetchFeed from './utils';
+import type { Route } from '@/types';
+
+import { fetchFeed } from './utils';
 
 export const route: Route = {
     path: '/user/:id',

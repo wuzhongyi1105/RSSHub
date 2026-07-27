@@ -1,13 +1,14 @@
-import { Route, ViewType } from '@/types';
-
-import cache from '@/utils/cache';
-import got from '@/utils/got';
 import { load } from 'cheerio';
 import iconv from 'iconv-lite';
-import timezone from '@/utils/timezone';
+
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import cache from '@/utils/cache';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
-import { art } from '@/utils/render';
-import path from 'node:path';
+import timezone from '@/utils/timezone';
+
+import { renderBookDescription } from './templates/book';
 
 export const route: Route = {
     path: '/book/:id?',
@@ -30,7 +31,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const id = ctx.req.param('id');
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 100;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 100;
 
     const rootUrl = 'https://www.jjwxc.net';
     const currentUrl = new URL(`onebook.php?novelid=${id}`, rootUrl).href;
@@ -67,7 +68,7 @@ async function handler(ctx) {
             return {
                 title: `${chapterName} ${chapterIntro}`,
                 link: chapterUrl,
-                description: art(path.join(__dirname, 'templates/book.art'), {
+                description: renderBookDescription({
                     chapterId,
                     chapterName,
                     chapterIntro,
@@ -79,7 +80,7 @@ async function handler(ctx) {
                 author,
                 category: [isVip ? 'VIP' : undefined, ...(category?.split(/\s/) ?? [])].filter(Boolean),
                 guid: `jjwxc-${id}#${chapterId}`,
-                pubDate: timezone(parseDate(chapterUpdatedTime), +8),
+                pubDate: timezone(parseDate(chapterUpdatedTime), 8),
                 isVip,
                 isLock,
             };
@@ -101,8 +102,8 @@ async function handler(ctx) {
 
                           content('span.favorite_novel').parent().remove();
 
-                          item.description += art(path.join(__dirname, 'templates/book.art'), {
-                              description: content('div.novelbody').html(),
+                          item.description += renderBookDescription({
+                              description: content('div.novelbody').html() || undefined,
                           });
                       }
 

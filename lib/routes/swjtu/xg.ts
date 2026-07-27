@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import InvalidParameterError from '@/errors/types/invalid-parameter';
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
-import InvalidParameterError from '@/errors/types/invalid-parameter';
 
 const rootURL = 'http://xg.swjtu.edu.cn';
 const listURL = {
@@ -43,9 +44,8 @@ const getItem = (item, cache) => {
                     link,
                     description: '',
                 };
-            } else {
-                throw error;
             }
+            throw error;
         }
     });
 };

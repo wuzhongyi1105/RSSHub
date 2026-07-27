@@ -1,9 +1,12 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
+
 import getCookie from '../utils/pypasswaf';
+
 const host = 'https://cs.nuaa.edu.cn/';
 
 const map = new Map([
@@ -39,7 +42,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const type = ctx.req.param('type');
-    const getDescription = Boolean(ctx.req.param('getDescription')) || false;
+    const getDescription = Boolean(ctx.req.param('getDescription'));
     const suffix = map.get(type).suffix;
 
     const link = new URL(suffix, host).href;
@@ -52,8 +55,10 @@ async function handler(ctx) {
     const response = await got(link, gotConfig);
     const $ = load(response.data);
 
+    const perCount = Number.parseInt($('.per_count', '#wp_paging_w6').text());
+    const allCount = Number.parseInt($('.all_count', '#wp_paging_w6').slice(1).text());
     const list = $('#news_list ul li')
-        .slice(0, Math.min(Number.parseInt($('.per_count', '#wp_paging_w6').text()), Number.parseInt($('.all_count', '#wp_paging_w6').slice(1).text())))
+        .slice(0, Math.min(perCount, allCount))
         .toArray()
         .map((element) => {
             const info = {

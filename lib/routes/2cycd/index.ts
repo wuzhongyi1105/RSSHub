@@ -1,10 +1,11 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+import iconv from 'iconv-lite';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import iconv from 'iconv-lite';
 
 // http://www.2cycd.com/forum.php?mod=forumdisplay&fid=43&orderby=dateline
 
@@ -52,7 +53,7 @@ async function handler(ctx) {
                 const first_post = content('td[id^="postmessage_"]').first();
                 const dateobj = content('em[id^="authorposton"]').first();
                 item.description = first_post.html();
-                item.pubDate = timezone(parseDate(dateobj.find('span').attr('title'), 'YYYY-M-D HH:mm:ss'), +8);
+                item.pubDate = timezone(parseDate(dateobj.find('span').attr('title'), 'YYYY-M-D HH:mm:ss'), 8);
 
                 return item;
             })

@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import { load } from 'cheerio';
 
 const baseUrl = 'https://cs.whu.edu.cn';
 
@@ -101,7 +102,7 @@ async function handler(ctx) {
                 });
 
                 item.description = content.html();
-                item.pubDate = $('meta[name="PubDate"]').length ? timezone(parseDate($('meta[name="PubDate"]').attr('content')), +8) : item.pubDate;
+                item.pubDate = $('meta[name="PubDate"]').length ? timezone(parseDate($('meta[name="PubDate"]').attr('content')), 8) : item.pubDate;
 
                 return item;
             })

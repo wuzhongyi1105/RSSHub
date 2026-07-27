@@ -1,8 +1,9 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
+import got from '@/utils/got';
+import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
 export const route: Route = {
@@ -38,7 +39,7 @@ export const route: Route = {
                 const $time = $item.find('.time');
                 const day = $time.find('.time-d').text().trim();
                 const monthYear = $time.contents().last().text().trim();
-                const pubDate = timezone(parseDate(`${monthYear}-${day}`, 'YYYY-MM-DD'), +8);
+                const pubDate = timezone(parseDate(`${monthYear}-${day}`, 'YYYY-MM-DD'), 8);
 
                 const $link = $item.find('.tit a');
                 let href = $link.attr('href') || '';

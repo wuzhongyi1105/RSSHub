@@ -1,14 +1,14 @@
-import { type CheerioAPI, type Cheerio, load } from 'cheerio';
+import type { Cheerio, CheerioAPI } from 'cheerio';
+import { load } from 'cheerio';
 import type { Element } from 'domhandler';
 
-import { type DataItem } from '@/types';
-
+import type { DataItem } from '@/types';
 import cache from '@/utils/cache';
 import ofetch from '@/utils/ofetch';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
-const rootUrl: string = 'https://www.jisilu.cn';
+const rootUrl = 'https://www.jisilu.cn';
 
 const processItems: ($: CheerioAPI, targetEl: Cheerio<Element>, limit: number) => Promise<DataItem[]> = async ($: CheerioAPI, targetEl: Cheerio<Element>, limit: number) => {
     const items: DataItem[] = targetEl
@@ -39,7 +39,7 @@ const processItems: ($: CheerioAPI, targetEl: Cheerio<Element>, limit: number) =
 
             return {
                 title,
-                pubDate: pubDateStr ? timezone(parseDate(pubDateStr), +8) : undefined,
+                pubDate: pubDateStr ? timezone(parseDate(pubDateStr), 8) : undefined,
                 link,
                 category: $item
                     .find('span.aw-question-tags a, a.aw-topic-name')
@@ -91,7 +91,7 @@ const processItems: ($: CheerioAPI, targetEl: Cheerio<Element>, limit: number) =
                     return {
                         title,
                         description,
-                        pubDate: pubDateStr ? timezone(parseDate(pubDateStr), +8) : item.pubDate,
+                        pubDate: pubDateStr ? timezone(parseDate(pubDateStr), 8) : item.pubDate,
                         link: item.link,
                         category: item.category,
                         author,
@@ -99,7 +99,7 @@ const processItems: ($: CheerioAPI, targetEl: Cheerio<Element>, limit: number) =
                             html: description,
                             text: $$('div.aw-question-detail-txt').first().text(),
                         },
-                        updated: updatedStr ? timezone(parseDate(updatedStr), +8) : item.updated,
+                        updated: updatedStr ? timezone(parseDate(updatedStr), 8) : item.updated,
                     };
                 });
             })
@@ -109,4 +109,4 @@ const processItems: ($: CheerioAPI, targetEl: Cheerio<Element>, limit: number) =
         .slice(0, limit);
 };
 
-export { rootUrl, processItems };
+export { processItems, rootUrl };

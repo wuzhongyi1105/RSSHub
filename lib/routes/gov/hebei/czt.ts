@@ -1,11 +1,12 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 
 export const route: Route = {
-    path: '/hebei/czt/xwdt/:category?',
+    path: '/czt/xwdt/:category?',
     categories: ['government'],
     example: '/gov/hebei/czt/xwdt',
     parameters: { category: '分类，见下表，默认为财政动态' },
@@ -45,7 +46,7 @@ async function handler(ctx) {
 
             return {
                 title: item.text(),
-                link: `${rootUrl}${/^\.\.\/\.\./.test(item.attr('href')) ? item.attr('href').replace(/^\.\.\/\.\./, '') : `/xwdt/${category}${item.attr('href').replace(/^\./, '')}`}`,
+                link: `${rootUrl}${item.attr('href').startsWith('../..') ? item.attr('href').replace(/^\.\.\/\.\./, '') : `/xwdt/${category}${item.attr('href').replace(/^\./, '')}`}`,
             };
         });
 

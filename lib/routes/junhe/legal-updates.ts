@@ -1,12 +1,12 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
 
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 
 export const handler = async (ctx) => {
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 10;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 10;
 
     const rootUrl = 'https://junhe.com';
     const currentUrl = new URL('legal-updates', rootUrl).href;

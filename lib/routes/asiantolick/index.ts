@@ -1,11 +1,11 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
 
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
-import { art } from '@/utils/render';
-import path from 'node:path';
+
+import { renderDescription } from './templates/description';
 
 export const route: Route = {
     path: '/:category{.+}?',
@@ -19,11 +19,14 @@ export const route: Route = {
     maintainers: [],
     handler,
     url: 'asiantolick.com/',
+    features: {
+        nsfw: true,
+    },
 };
 
 async function handler(ctx) {
     const category = ctx.req.param('category');
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 24;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 24;
 
     const rootUrl = 'https://asiantolick.com';
     const apiUrl = new URL('ajax/buscar_posts.php', rootUrl).href;
@@ -57,11 +60,11 @@ async function handler(ctx) {
             return {
                 title: item.find('div.base_tt').text(),
                 link: item.prop('href'),
-                description: art(path.join(__dirname, 'templates/description.art'), {
+                description: renderDescription({
                     images: image
                         ? [
                               {
-                                  src: image.prop('data-src').split(/\?/)[0],
+                                  src: image.prop('data-src').split(/\?/, 1)[0],
                                   alt: image.prop('alt'),
                               },
                           ]
@@ -84,7 +87,7 @@ async function handler(ctx) {
                 const content = load(detailResponse);
 
                 item.title = content('h1').first().text();
-                item.description = art(path.join(__dirname, 'templates/description.art'), {
+                item.description = renderDescription({
                     description: content('#metadata_qrcode').html(),
                     images: content('div.miniatura')
                         .toArray()
@@ -112,7 +115,7 @@ async function handler(ctx) {
 
     $ = load(currentResponse);
 
-    const title = $('title').text().split(/-/)[0].trim();
+    const title = $('title').text().split(/-/, 1)[0].trim();
     const icon = $('link[rel="icon"]').first().prop('href');
 
     return {

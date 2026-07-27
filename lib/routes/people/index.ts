@@ -1,12 +1,13 @@
-import { Route } from '@/types';
-import cache from '@/utils/cache';
-import ofetch from '@/utils/ofetch';
 import { load } from 'cheerio';
 import iconv from 'iconv-lite';
-import timezone from '@/utils/timezone';
-import { parseDate } from '@/utils/parse-date';
-import { isValidHost } from '@/utils/valid-host';
+
 import InvalidParameterError from '@/errors/types/invalid-parameter';
+import type { Route } from '@/types';
+import cache from '@/utils/cache';
+import ofetch from '@/utils/ofetch';
+import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
+import { isValidHost } from '@/utils/valid-host';
 
 export const route: Route = {
     path: '/:site?/:category{.+}?',
@@ -21,7 +22,7 @@ async function handler(ctx) {
     let { category = site === 'www' ? '59476' : '' } = ctx.req.param();
     category = site === 'cpc' && category === '24h' ? '87228' : category;
 
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 30;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 30;
 
     if (!isValidHost(site)) {
         throw new InvalidParameterError('Invalid site');
@@ -76,7 +77,7 @@ async function handler(ctx) {
                     content('.paper_num, #rwb_tjyd').remove();
 
                     item.description = content('#rwb_zw').html();
-                    item.pubDate = timezone(parseDate(data.match(/(\d{4}年\d{2}月\d{2}日\d{2}:\d{2})/)?.[1] || '', 'YYYY年MM月DD日 HH:mm'), +8);
+                    item.pubDate = timezone(parseDate(data.match(/(\d{4}年\d{2}月\d{2}日\d{2}:\d{2})/)?.[1] || '', 'YYYY年MM月DD日 HH:mm'), 8);
                 } catch (error) {
                     item.description = String(error);
                 }

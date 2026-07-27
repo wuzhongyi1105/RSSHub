@@ -1,6 +1,7 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -40,7 +41,7 @@ async function handler() {
             return {
                 title: `${td[2].children[0].data}|${td[3].children[0].data}|${td[4].children[0].data}|${td[5].children[0].data}|${td[6].children[0].data}`,
                 link: url,
-                pubDate: timezone(parseDate(`${td[1].children[0].data} ${td[1].children[2].data.slice(0, 8)}`, 'DD-MM-YY HH:mm:ss'), +7),
+                pubDate: timezone(parseDate(`${td[1].children[0].data} ${td[1].children[2].data.slice(0, 8)}`, 'DD-MM-YY HH:mm:ss'), 7),
             };
         });
 

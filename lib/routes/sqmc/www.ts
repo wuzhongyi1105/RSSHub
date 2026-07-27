@@ -1,9 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
-import timezone from '@/utils/timezone';
 import { parseDate } from '@/utils/parse-date';
+import timezone from '@/utils/timezone';
 
 export const route: Route = {
     path: '/www/:category?',
@@ -66,7 +67,7 @@ async function handler(ctx) {
                         title: item.find('dt a').text(),
                         description: content('div.Tr_Detail').html(),
                         link,
-                        pubDate: timezone(pubDate, +8),
+                        pubDate: timezone(pubDate, 8),
                     };
                 });
 

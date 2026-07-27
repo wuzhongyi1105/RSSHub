@@ -1,6 +1,7 @@
+import { load } from 'cheerio';
+
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -30,10 +31,10 @@ async function getNoticeList(ctx, url, host, listSelector, titleSelector, conten
                     item.title = $(contentSelector.title).text();
                     item.description = $(contentSelector.content)
                         .html()
-                        .replaceAll('src="/', `src="${new URL('.', host).href}`)
-                        .replaceAll('href="/', `href="${new URL('.', host).href}`)
+                        .replaceAll('src="/', () => `src="${new URL('.', host).href}`)
+                        .replaceAll('href="/', () => `href="${new URL('.', host).href}`)
                         .trim();
-                    item.pubDate = timezone(parseDate($(contentSelector.date).text()), +8);
+                    item.pubDate = timezone(parseDate($(contentSelector.date).text()), 8);
                 }
                 return item;
             })

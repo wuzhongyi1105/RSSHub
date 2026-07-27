@@ -1,7 +1,8 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 
 const host = 'https://jwb.shu.edu.cn/';
@@ -12,7 +13,7 @@ const alias = new Map([
 ]);
 
 export const route: Route = {
-    path: ['/jwb/:type?'],
+    path: '/jwb/:type?',
     radar: [
         {
             source: ['www.shu.edu.cn/index'],
@@ -22,9 +23,9 @@ export const route: Route = {
     name: '教务部',
     maintainers: ['tuxinghuan', 'GhhG123'],
     handler,
-    description: `| 通知通告 | 新闻 | 政策文件(bug) |
-| -------- | ---- | -------- |
-| notice   | news | policy   |`,
+    description: `| 通知通告 | 新闻 | 政策文件 (bug) |
+| -------- | ---- | -------------- |
+| notice   | news | policy         |`,
 };
 
 async function handler(ctx) {

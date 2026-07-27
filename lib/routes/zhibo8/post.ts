@@ -1,6 +1,7 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
 
@@ -45,7 +46,7 @@ async function handler(ctx) {
                     .match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)[0],
                 'YYYY-MM-DD HH:mm'
             ),
-            +8
+            8
         );
 
         const single = {

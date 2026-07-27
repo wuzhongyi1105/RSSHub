@@ -1,9 +1,12 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
+
 import getCookie from '../utils/pypasswaf';
+
 const host = 'http://www.graduate.nuaa.edu.cn/';
 
 const map = new Map([
@@ -37,7 +40,7 @@ export const route: Route = {
 async function handler(ctx) {
     const type = ctx.req.param('type');
     const suffix = map.get(type).suffix;
-    const getDescription = Boolean(ctx.req.param('getDescription')) || false;
+    const getDescription = Boolean(ctx.req.param('getDescription'));
     const link = new URL(suffix, host).href;
     const cookie = await getCookie(host);
     const gotConfig = {

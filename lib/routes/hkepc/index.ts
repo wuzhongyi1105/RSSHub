@@ -1,9 +1,11 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
+
 import { baseUrl, categoryMap } from './data';
 
 export const route: Route = {
@@ -94,7 +96,7 @@ async function handler(ctx) {
                 // Taken from /caixin/blog.js
                 content
                     .find('#view > p')
-                    .filter((_, e) => e.children[0]?.data === String.fromCharCode(160))
+                    .filter((_, e) => e.children[0]?.data === String.fromCodePoint(160))
                     .remove();
 
                 // fix lazyload image
@@ -109,7 +111,7 @@ async function handler(ctx) {
                     .toArray()
                     .map((e) => $(e).text().trim());
                 item.description = content.html();
-                item.pubDate = timezone(parseDate($('.publishDate').text()), +8);
+                item.pubDate = timezone(parseDate($('.publishDate').text()), 8);
                 item.guid = item.link.slice(0, item.link.lastIndexOf('/'));
 
                 return item;

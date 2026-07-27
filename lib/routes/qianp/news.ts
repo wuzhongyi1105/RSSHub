@@ -1,8 +1,10 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
+
 import { getTokenAndSecret } from './utils';
 
 export const route: Route = {
@@ -17,7 +19,7 @@ async function handler(ctx) {
     const { path = 'news/recommend' } = ctx.req.param();
     const url = `${baseUrl}/${path}/`;
 
-    const { token, secret } = await getTokenAndSecret(cache.tryGet);
+    const { token, secret } = await getTokenAndSecret();
     const headers = {
         cookie: token ? `t=${token}; r=${secret - 100}` : undefined,
     };

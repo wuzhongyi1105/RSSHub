@@ -1,13 +1,15 @@
-import { Data, DataItem } from '@/types';
-import { NarouNovelFetch, SearchBuilder, SearchParams, BigGenre } from 'narou';
-import { art } from '@/utils/render';
-import path from 'node:path';
+import type { SearchParams } from 'narou';
+import { BigGenre, NarouNovelFetch, SearchBuilder } from 'narou';
+import type { Join } from 'narou/util/type';
+
 import InvalidParameterError from '@/errors/types/invalid-parameter';
-import { Join } from 'narou/util/type';
-import { RankingPeriod, NovelType, periodToJapanese, novelTypeToJapanese, periodToOrder, periodToPointField, IsekaiCategory, isekaiCategoryToJapanese } from './types/ranking';
+import type { Data, DataItem } from '@/types';
+
+import { renderDescription } from './templates/description';
+import { IsekaiCategory, isekaiCategoryToJapanese, NovelType, novelTypeToJapanese, periodToJapanese, periodToOrder, periodToPointField, RankingPeriod } from './types/ranking';
 
 export function parseIsekaiRankingType(type: string): { period: RankingPeriod; category: IsekaiCategory; novelType: NovelType } {
-    const [periodStr, categoryStr, novelTypeStr = NovelType.TOTAL] = type.split('_');
+    const [periodStr, categoryStr, novelTypeStr = NovelType.TOTAL] = type.split('_', 3);
 
     const period = periodStr as RankingPeriod;
     const category = categoryStr as IsekaiCategory;
@@ -62,7 +64,7 @@ export async function handleIsekaiRanking(type: string, limit: number): Promise<
     const [tenseiResult, tenniResult] = await Promise.all([new SearchBuilder({ ...searchParams, istensei: 1 }, api).execute(), new SearchBuilder({ ...searchParams, istenni: 1 }, api).execute()]);
 
     const combinedNovels = [...tenseiResult.values, ...tenniResult.values];
-    const uniqueNovels = [...new Map(combinedNovels.map((novel) => [novel.ncode, novel])).values()];
+    const uniqueNovels = new Map(combinedNovels.map((novel) => [novel.ncode, novel])).values().toArray();
 
     const pointField = periodToPointField[period];
     if (!pointField) {
@@ -70,15 +72,13 @@ export async function handleIsekaiRanking(type: string, limit: number): Promise<
     }
 
     const items = uniqueNovels
-        .sort((a, b) => (b[pointField] || 0) - (a[pointField] || 0))
+        .toSorted((a, b) => (b[pointField] || 0) - (a[pointField] || 0))
         .map((novel, index) => ({
             title: `#${index + 1} ${novel.title}`,
             link: `https://ncode.syosetu.com/${String(novel.ncode).toLowerCase()}`,
-            description: art(path.join(__dirname, 'templates/description.art'), {
-                novel,
-            }),
+            description: renderDescription({ novel }),
             author: novel.writer,
-            category: novel.keyword.split(/[\s/\uFF0F]/).filter(Boolean),
+            category: novel.keyword.split(/[\s/\u{FF0F}]/u).filter(Boolean),
         }));
 
     return {

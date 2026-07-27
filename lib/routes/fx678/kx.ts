@@ -1,6 +1,8 @@
-import { Route, ViewType } from '@/types';
-import cache from '@/utils/cache';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import cache from '@/utils/cache';
 import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
@@ -50,7 +52,7 @@ async function handler() {
                 const contentPart = $('.article-main .content').html().trim();
                 const forewordPart = $('.article-main .foreword').html().trim();
                 const datetimeString = $('.article-cont .details i').text().trim();
-                const articlePubDate = timezone(parseDate(datetimeString, 'YYYY-MM-DD HH:mm:ss'), +8);
+                const articlePubDate = timezone(parseDate(datetimeString, 'YYYY-MM-DD HH:mm:ss'), 8);
 
                 const item = {
                     title: $('.article-main .foreword').text().trim().split('——').pop(),

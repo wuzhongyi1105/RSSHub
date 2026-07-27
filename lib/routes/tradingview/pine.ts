@@ -1,6 +1,7 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 
 export const route: Route = {
@@ -18,7 +19,7 @@ export const route: Route = {
 
 async function handler(ctx) {
     const { version = 'v5' } = ctx.req.param();
-    const limit = ctx.req.query('limit') ? Number.parseInt(ctx.req.query('limit'), 10) : 100;
+    const limit = ctx.req.query('limit') ? Number(ctx.req.query('limit')) : 100;
 
     const rootUrl = 'https://www.tradingview.com';
     const currentUrl = new URL(`pine-script-docs/en/${version}/Release_notes.html`, rootUrl).href;

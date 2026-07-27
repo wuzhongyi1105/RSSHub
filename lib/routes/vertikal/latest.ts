@@ -1,8 +1,9 @@
-import { Route } from '@/types';
-import ofetch from '@/utils/ofetch';
-import * as cheerio from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
+import { load } from 'cheerio';
+
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
+import ofetch from '@/utils/ofetch';
+import { parseDate } from '@/utils/parse-date';
 
 export const route: Route = {
     path: '/latest',
@@ -28,7 +29,7 @@ async function handler() {
             page: 1,
         },
     });
-    const $ = cheerio.load(response);
+    const $ = load(response);
 
     const list = $('.grid__column')
         .toArray()
@@ -46,7 +47,7 @@ async function handler() {
         list.map((item) =>
             cache.tryGet(item.link, async () => {
                 const response = await ofetch(item.link);
-                const $ = cheerio.load(response);
+                const $ = load(response);
 
                 const content = $('.newsentry');
 

@@ -1,13 +1,15 @@
-import { baseUrl, gqlMap, gqlFeatures, consumerKey, consumerSecret } from './constants';
-import { config } from '@/config';
-import logger from '@/utils/logger';
-import OAuth from 'oauth-1.0a';
 import CryptoJS from 'crypto-js';
+import OAuth from 'oauth-1.0a';
 import queryString from 'query-string';
-import { getToken } from './token';
-import cache from '@/utils/cache';
+
+import { config } from '@/config';
 import InvalidParameterError from '@/errors/types/invalid-parameter';
+import cache from '@/utils/cache';
+import logger from '@/utils/logger';
 import ofetch from '@/utils/ofetch';
+
+import { baseUrl, consumerKey, consumerSecret, gqlFeatures, gqlMap } from './constants';
+import { getToken } from './token';
 
 const twitterGot = async (url, params) => {
     const token = await getToken();
@@ -46,7 +48,7 @@ const twitterGot = async (url, params) => {
     return response._data;
 };
 
-const paginationTweets = async (endpoint, userId, variables, path) => {
+const paginationTweets = async (endpoint, userId, variables, path?) => {
     const { data } = await twitterGot(baseUrl + endpoint, {
         variables: JSON.stringify({
             ...variables,
@@ -126,7 +128,7 @@ const listTweets = (listId, params = {}) =>
         ['list', 'timeline_response', 'timeline']
     );
 
-function gatherLegacyFromData(entries, filterNested, userId) {
+function gatherLegacyFromData(entries, filterNested?, userId?) {
     const tweets = [];
     const filteredEntries = [];
     for (const entry of entries) {
@@ -141,42 +143,44 @@ function gatherLegacyFromData(entries, filterNested, userId) {
         }
     }
     for (const entry of filteredEntries) {
-        if (entry.entryId) {
-            const content = entry.content || entry.item;
-            let tweet = content?.content?.tweetResult?.result || content?.itemContent?.tweet_results?.result;
-            if (tweet && tweet.tweet) {
-                tweet = tweet.tweet;
-            }
-            if (tweet) {
-                const retweet = tweet.legacy?.retweeted_status_result?.result;
-                for (const t of [tweet, retweet]) {
-                    if (!t?.legacy) {
-                        continue;
-                    }
-                    t.legacy.user = t.core?.user_result?.result?.legacy || t.core?.user_results?.result?.legacy;
-                    t.legacy.id_str = t.rest_id; // avoid falling back to conversation_id_str elsewhere
-                    const quote = t.quoted_status_result?.result;
-                    if (quote) {
-                        t.legacy.quoted_status = quote.legacy;
-                        t.legacy.quoted_status.user = quote.core.user_result?.result?.legacy || quote.core.user_results?.result?.legacy;
-                    }
-                    if (t.note_tweet) {
-                        const tmp = t.note_tweet.note_tweet_results.result;
-                        t.legacy.entities.hashtags = tmp.entity_set.hashtags;
-                        t.legacy.entities.symbols = tmp.entity_set.symbols;
-                        t.legacy.entities.urls = tmp.entity_set.urls;
-                        t.legacy.entities.user_mentions = tmp.entity_set.user_mentions;
-                        t.legacy.full_text = tmp.text;
-                    }
+        if (!entry.entryId) {
+            continue;
+        }
+
+        const content = entry.content || entry.item;
+        let tweet = content?.content?.tweetResult?.result || content?.itemContent?.tweet_results?.result;
+        if (tweet && tweet.tweet) {
+            tweet = tweet.tweet;
+        }
+        if (tweet) {
+            const retweet = tweet.legacy?.retweeted_status_result?.result;
+            for (const t of [tweet, retweet]) {
+                if (!t?.legacy) {
+                    continue;
                 }
-                const legacy = tweet.legacy;
-                if (legacy) {
-                    if (retweet) {
-                        legacy.retweeted_status = retweet.legacy;
-                    }
-                    if (userId === undefined || legacy.user_id_str === userId + '') {
-                        tweets.push(legacy);
-                    }
+                t.legacy.user = t.core?.user_result?.result?.legacy || t.core?.user_results?.result?.legacy;
+                t.legacy.id_str = t.rest_id; // avoid falling back to conversation_id_str elsewhere
+                const quote = t.quoted_status_result?.result;
+                if (quote) {
+                    t.legacy.quoted_status = quote.legacy;
+                    t.legacy.quoted_status.user = quote.core.user_result?.result?.legacy || quote.core.user_results?.result?.legacy;
+                }
+                if (t.note_tweet) {
+                    const tmp = t.note_tweet.note_tweet_results.result;
+                    t.legacy.entities.hashtags = tmp.entity_set.hashtags;
+                    t.legacy.entities.symbols = tmp.entity_set.symbols;
+                    t.legacy.entities.urls = tmp.entity_set.urls;
+                    t.legacy.entities.user_mentions = tmp.entity_set.user_mentions;
+                    t.legacy.full_text = tmp.text;
+                }
+            }
+            const legacy = tweet.legacy;
+            if (legacy) {
+                if (retweet) {
+                    legacy.retweeted_status = retweet.legacy;
+                }
+                if (userId === undefined || legacy.user_id_str === userId + '') {
+                    tweets.push(legacy);
                 }
             }
         }
@@ -280,7 +284,7 @@ const getUserTweets = async (id, params = {}) => {
             return !idSet.has(id_str) && idSet.add(id_str) && tweet;
         }) // deduplicate
         .filter(Boolean) // remove null
-        .sort((a, b) => (b.id_str || b.conversation_id_str) - (a.id_str || a.conversation_id_str)) // desc
+        .toSorted((a, b) => (b.id_str || b.conversation_id_str) - (a.id_str || a.conversation_id_str)) // desc
         .slice(0, 20);
     cache.set(cacheKey, JSON.stringify(tweets));
     return tweets;

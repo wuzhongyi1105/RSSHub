@@ -1,13 +1,17 @@
-import { Route, ViewType } from '@/types';
-import cache from '@/utils/cache';
-import { config } from '@/config';
-import ofetch from '@/utils/ofetch';
-import { load } from 'cheerio';
-import { parseDate } from '@/utils/parse-date';
-import { art } from '@/utils/render';
-import path from 'node:path';
 import querystring from 'node:querystring';
+
+import { load } from 'cheerio';
+import { FetchError } from 'ofetch';
+
+import { config } from '@/config';
+import type { Route } from '@/types';
+import { ViewType } from '@/types';
+import cache from '@/utils/cache';
+import ofetch from '@/utils/ofetch';
+import { parseDate } from '@/utils/parse-date';
 import { fallback, queryToBoolean } from '@/utils/readable-social';
+
+import { renderVideo } from './templates/video';
 import tglibchannel from './tglib/channel';
 
 /* message types */
@@ -141,13 +145,17 @@ For backward compatibility reasons, invalid \`routeParams\` will be treated as \
     name: 'Channel',
     maintainers: ['DIYgod', 'Rongronggg9', 'synchrone', 'pseudoyu'],
     handler,
-    description: `
-::: tip
-  Due to Telegram restrictions, some channels involving pornography, copyright, and politics cannot be subscribed. You can confirm by visiting \`https://t.me/s/:username\`, it's recommended to deploy your own instance with telegram api configs (create your telegram application via \`https://core.telegram.org/api/obtaining_api_id\`, run this command \`node ./lib/routes/telegram/scripts/get-telegram-session.mjs\` to get \`TELEGRAM_SESSION\` and set it as Environment Variable).
+    description: `::: tip
+Due to Telegram restrictions, some channels involving pornography, copyright, and politics cannot be subscribed. You can confirm by visiting \`https://t.me/s/:username\`, it's recommended to deploy your own instance with telegram api configs (create your telegram application via \`https://core.telegram.org/api/obtaining_api_id\`, run this command \`node ./lib/routes/telegram/scripts/get-telegram-session.mjs\` to get \`TELEGRAM_SESSION\` and set it as Environment Variable).
 :::`,
 };
 
 async function handler(ctx) {
+    const useWeb = ctx.req.param('routeParams') || !config.telegram.session;
+    if (!useWeb) {
+        return tglibchannel(ctx);
+    }
+
     const username = ctx.req.param('username');
     let routeParams = ctx.req.param('routeParams');
     let showLinkPreview = true;
@@ -188,8 +196,14 @@ async function handler(ctx) {
     const data = await cache.tryGet(
         resourceUrl,
         async () => {
-            const _r = await ofetch(resourceUrl);
-            return _r;
+            try {
+                return await ofetch(resourceUrl);
+            } catch (error) {
+                if (error instanceof FetchError && error.statusCode) {
+                    throw error;
+                }
+                return await ofetch(resourceUrl.replace('https://t.me/', 'https://telegram.me/'));
+            }
         },
         config.cache.routeExpire,
         false
@@ -219,10 +233,6 @@ async function handler(ctx) {
         : $('.tgme_widget_message_wrap:not(.tgme_widget_message_wrap:has(.service_message,.tme_no_messages_found))'); // also exclude service messages
 
     if (list.length === 0 && $('.tgme_channel_history').length === 0) {
-        if (config.telegram.session) {
-            return tglibchannel(ctx);
-        }
-
         throw new Error(`Unable to fetch message feed from this channel. Please check this URL to see if you can view the message preview: ${resourceUrl}`);
     }
 
@@ -352,38 +362,37 @@ async function handler(ctx) {
                     const replyObj = item.find('.tgme_widget_message_reply');
                     if (replyObj.length === 0) {
                         return '';
-                    } else {
-                        const replyAuthorObj = replyObj.find('.tgme_widget_message_author_name');
-                        const replyAuthor = replyAuthorObj.length ? replyAuthorObj.text() : '';
-                        const viaBotObj = replyObj.find('.tgme_widget_message_via_bot');
-                        const viaBotText = viaBotObj.length ? ` via <b>${viaBotObj.text()}</b>` : '';
-                        const replyLinkHref = replyObj.attr('href');
-                        const replyLink = replyLinkHref.length ? replyLinkHref : '';
-                        const replyMetaTextObj = replyObj.find('.tgme_widget_message_metatext');
-                        const replyMetaText = replyMetaTextObj.length ? `<p><small>${replyMetaTextObj.html()}</small></p>` : '';
-                        const replyTextObj = replyObj.find('.tgme_widget_message_text');
-                        const replyText = replyTextObj.length ? `<p>${replyTextObj.html()}</p>` : '';
+                    }
+                    const replyAuthorObj = replyObj.find('.tgme_widget_message_author_name');
+                    const replyAuthor = replyAuthorObj.length ? replyAuthorObj.text() : '';
+                    const viaBotObj = replyObj.find('.tgme_widget_message_via_bot');
+                    const viaBotText = viaBotObj.length ? ` via <b>${viaBotObj.text()}</b>` : '';
+                    const replyLinkHref = replyObj.attr('href');
+                    const replyLink = replyLinkHref.length ? replyLinkHref : '';
+                    const replyMetaTextObj = replyObj.find('.tgme_widget_message_metatext');
+                    const replyMetaText = replyMetaTextObj.length ? `<p><small>${replyMetaTextObj.html()}</small></p>` : '';
+                    const replyTextObj = replyObj.find('.tgme_widget_message_text');
+                    const replyText = replyTextObj.length ? `<p>${replyTextObj.html()}</p>` : '';
 
-                        extra = {
-                            links: [
-                                {
-                                    type: 'reply',
-                                    url: replyLink,
-                                },
-                            ],
-                        };
-                        return replyLink === ''
-                            ? `<div class="rsshub-quote"><blockquote>
+                    extra = {
+                        links: [
+                            {
+                                type: 'reply',
+                                url: replyLink,
+                            },
+                        ],
+                    };
+                    return replyLink === ''
+                        ? `<div class="rsshub-quote"><blockquote>
                                     <p><b>${replyAuthor}</b>${viaBotText}:</p>
                                     ${replyMetaText}
                                     ${replyText}
                                 </blockquote></div>`
-                            : `<div class="rsshub-quote"><blockquote>
+                        : `<div class="rsshub-quote"><blockquote>
                                     <p><a href='${replyLink}'><b>${replyAuthor}</b>${viaBotText}:</a></p>
                                     ${replyMetaText}
                                     ${replyText}
                                 </blockquote></div>`;
-                    }
                 };
 
                 /* via bot */
@@ -393,9 +402,8 @@ async function handler(ctx) {
                         const userLink = viaBotObj.attr('href');
                         const userHtml = userLink ? `<a href="${userLink}">${viaBotObj.text()}</a>` : viaBotObj.text();
                         return `<p>via <b>${userHtml}</b></p>`;
-                    } else {
-                        return '';
                     }
+                    return '';
                 };
 
                 /* images and videos */
@@ -416,7 +424,7 @@ async function handler(ctx) {
                             const thumbBackground = $node.find('.tgme_widget_message_video_thumb').css('background-image');
                             const thumbBackgroundUrl = thumbBackground && thumbBackground.match(/url\('(.*)'\)/);
                             const thumbBackgroundUrlSrc = thumbBackgroundUrl && thumbBackgroundUrl[1];
-                            tag_media += art(path.join(__dirname, 'templates/video.art'), {
+                            tag_media += renderVideo({
                                 source: videoLink,
                                 poster: thumbBackgroundUrlSrc,
                             });
@@ -433,7 +441,7 @@ async function handler(ctx) {
                         } else if (node.attribs && node.attribs.class && node.attribs.class.search(/(^|\s)tgme_widget_message_videosticker(\s|$)/) !== -1) {
                             // video sticker
                             const videoLink = $node.find('.js-videosticker_video').attr('src');
-                            tag_media += art(path.join(__dirname, 'templates/video.art'), {
+                            tag_media += renderVideo({
                                 source: videoLink,
                             });
                         } else if (node.name === 'img') {
@@ -469,7 +477,7 @@ async function handler(ctx) {
                             let width = 0;
                             const widthStr = $node.css('width');
                             if (widthStr && widthStr.endsWith('px')) {
-                                width = Number.parseFloat(widthStr);
+                                width = Number(widthStr);
                             }
                             /*
                              * Height is present when the message is an album but does not exist in other cases.
@@ -479,7 +487,7 @@ async function handler(ctx) {
                             let height = 0;
                             const heightStr = $node.css('height');
                             if (heightStr && heightStr.endsWith('px')) {
-                                height = Number.parseFloat(heightStr);
+                                height = Number(heightStr);
                             }
                             /*
                              * Only calculate height when needed.
@@ -488,11 +496,15 @@ async function handler(ctx) {
                              */
                             const aspectRatioStr = $node.find('.tgme_widget_message_photo').css('padding-top');
                             if (height <= 0 && width > 0 && aspectRatioStr && aspectRatioStr.endsWith('%')) {
-                                height = (Number.parseFloat(aspectRatioStr) / 100) * width;
+                                height = (Number(aspectRatioStr) / 100) * width;
                             }
                             // Only set width/height when >32 to avoid invisible images.
-                            width > 32 && attrs.push(`width="${width}"`);
-                            height > 32 && attrs.push(`height="${height.toFixed(2).replace('.00', '')}"`);
+                            if (width > 32) {
+                                attrs.push(`width="${width}"`);
+                            }
+                            if (height > 32) {
+                                attrs.push(`height="${height.toFixed(2).replace('.00', '')}"`);
+                            }
                             tag_media += backgroundUrlSrc ? `<img ${attrs.join(' ')}>` : '';
                         }
                         if (tag_media) {
@@ -515,11 +527,10 @@ async function handler(ctx) {
                         const mapBackground = locationObj.find('.tgme_widget_message_location').css('background-image');
                         const mapBackgroundUrl = mapBackground && mapBackground.match(/url\('(.*)'\)/);
                         const mapBackgroundUrlSrc = mapBackgroundUrl && mapBackgroundUrl[1];
-                        const mapImgHtml = mapBackgroundUrlSrc ? `<img src="${mapBackgroundUrlSrc}">` : (showMediaTagAsEmoji ? mediaTagDict[LOCATION][1] : mediaTagDict[LOCATION][0]);
+                        const mapImgHtml = mapBackgroundUrlSrc ? `<img src="${mapBackgroundUrlSrc}">` : showMediaTagAsEmoji ? mediaTagDict[LOCATION][1] : mediaTagDict[LOCATION][0];
                         return locationLink ? `<a href="${locationLink}">${mapImgHtml}</a>` : mapImgHtml;
-                    } else {
-                        return '';
                     }
+                    return '';
                 };
 
                 /* voice */
@@ -545,13 +556,12 @@ async function handler(ctx) {
                         let second = 0,
                             minute = 1;
                         while (p.length > 0) {
-                            second += minute * Number.parseInt(p.pop(), 10);
+                            second += minute * Number(p.pop());
                             minute *= 60;
                         }
                         return second.toString();
-                    } else {
-                        return '';
                     }
+                    return '';
                 };
 
                 /* link preview */
@@ -655,13 +665,13 @@ async function handler(ctx) {
                 if (msgTypes.includes(UNSUPPORTED)) {
                     if (unsupportedNodes.length) {
                         unsupportedHtml += '<blockquote>';
-                        unsupportedNodes.find('.message_media_not_supported_label').each(function () {
-                            const $this = $(this);
+                        unsupportedNodes.find('.message_media_not_supported_label').each((_, el) => {
+                            const $this = $(el);
                             unsupportedTitle += $this.text();
                             unsupportedHtml += `<p>${$this.text()}</p>`;
                         });
-                        unsupportedNodes.find('.message_media_view_in_telegram').each(function () {
-                            const $this = $(this);
+                        unsupportedNodes.find('.message_media_view_in_telegram').each((_, el) => {
+                            const $this = $(el);
                             unsupportedHtml += $this.attr('href') ? `<p><a href="${$this.attr('href')}">${$this.text()}</a></p>` : `<p>${$this.text()}</p>`;
                         });
                         unsupportedHtml += '</blockquote>';
@@ -715,7 +725,7 @@ async function handler(ctx) {
                 if (messageTextObj.length > 0 && !titleCompleteFlag) {
                     const _messageTextObj = $(messageTextObj.toString());
                     _messageTextObj.find('br').replaceWith('\n');
-                    const trimmedTitleText = _messageTextObj.text().split('\n').at(0)?.trim();
+                    const trimmedTitleText = _messageTextObj.text().split('\n', 1).at(0)?.trim();
                     messageTitle += (messageTitle && trimmedTitleText ? ': ' : '') + trimmedTitleText;
                 }
 

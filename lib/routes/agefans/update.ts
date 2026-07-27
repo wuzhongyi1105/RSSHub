@@ -1,9 +1,11 @@
-import { DataItem, Route } from '@/types';
+import { load } from 'cheerio';
+import pMap from 'p-map';
+
+import type { DataItem, Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
+
 import { rootUrl } from './utils';
-import pMap from 'p-map';
 
 export const route: Route = {
     path: '/update',
@@ -55,10 +57,12 @@ async function handler() {
                 const content = load(detailResponse.data);
 
                 content('img').each((_, ele) => {
-                    if (ele.attribs['data-original']) {
-                        ele.attribs.src = ele.attribs['data-original'];
-                        delete ele.attribs['data-original'];
+                    if (!ele.attribs['data-original']) {
+                        return;
                     }
+
+                    ele.attribs.src = ele.attribs['data-original'];
+                    delete ele.attribs['data-original'];
                 });
                 content('.video_detail_collect').remove();
 

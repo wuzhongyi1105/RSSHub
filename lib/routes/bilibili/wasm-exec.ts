@@ -1,6 +1,17 @@
+// oxlint-disable unicorn/prefer-math-trunc
+// oxlint-disable unicorn-js/no-this-outside-of-class
+// oxlint-disable unicorn-js/no-array-from-fill
+// oxlint-disable unicorn-js/no-global-object-property-assignment
+// oxlint-disable unicorn-js/no-unnecessary-global-this
+// oxlint-disable unicorn-js/no-undeclared-class-members
+// oxlint-disable unicorn-js/prefer-array-from-map
+// oxlint-disable unicorn-js/require-array-sort-compare
+// oxlint-disable unicorn-js/prefer-short-arrow-method
+// oxlint-disable unicorn-js/prefer-block-statement-over-iife
+// oxlint-disable no-unused-vars
+// oxlint-disable unicorn/consistent-function-scoping
 /* eslint-disable prefer-rest-params */
 /* eslint-disable default-case */
-/* eslint-disable unicorn/consistent-function-scoping */
 /* eslint-disable no-console */
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
@@ -147,7 +158,6 @@
         };
     }
 
-    // eslint-disable-next-line n/no-unsupported-features/node-builtins
     if (!globalThis.crypto) {
         throw new Error('globalThis.crypto is not available, polyfill required (crypto.getRandomValues only)');
     }
@@ -164,7 +174,7 @@
         throw new Error('globalThis.TextDecoder is not available, polyfill required');
     }
 
-    const encoder = new TextEncoder('utf-8');
+    const encoder = new TextEncoder();
     const decoder = new TextDecoder('utf-8');
 
     globalThis.Go = class {
@@ -208,7 +218,7 @@
             };
 
             const storeValue = (addr, v) => {
-                const nanHead = 0x7F_F8_00_00;
+                const nanHead = 0x7f_f8_00_00;
 
                 if (typeof v === 'number' && v !== 0) {
                     if (Number.isNaN(v)) {
@@ -320,7 +330,7 @@
 
                     // func resetMemoryDataView()
                     'runtime.resetMemoryDataView': (sp) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-useless-assignment
                         sp >>>= 0;
                         this.mem = new DataView(this._inst.exports.mem.buffer);
                     },
@@ -373,7 +383,6 @@
                     // func getRandomData(r []byte)
                     'runtime.getRandomData': (sp) => {
                         sp >>>= 0;
-                        // eslint-disable-next-line n/no-unsupported-features/node-builtins
                         crypto.getRandomValues(loadSlice(sp + 8));
                     },
 
@@ -595,7 +604,7 @@
             }
             argvPtrs.push(0);
 
-            const keys = Object.keys(this.env).sort();
+            const keys = Object.keys(this.env).toSorted();
             for (const key of keys) {
                 argvPtrs.push(strPtr(`${key}=${this.env[key]}`));
             }
@@ -634,7 +643,7 @@
 
         _makeFuncWrapper(id) {
             // somehow avoiding aliasing this with an arrow function doesn't work
-            // eslint-disable-next-line unicorn/no-this-assignment, @typescript-eslint/no-this-alias
+            // oxlint-disable-next-line unicorn/no-this-assignment typescript/no-this-alias
             const go = this;
             return function () {
                 const event = { id, this: this, args: arguments };

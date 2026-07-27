@@ -1,6 +1,7 @@
-import { Route } from '@/types';
-import got from '@/utils/got';
 import { load } from 'cheerio';
+
+import type { Route } from '@/types';
+import got from '@/utils/got';
 import { parseDate } from '@/utils/parse-date';
 
 export const route: Route = {
@@ -37,8 +38,7 @@ async function handler(ctx) {
     }
     if (language === 'tw') {
         changelog = '更新日誌';
-    }
-    if (language === 'en') {
+    } else if (language === 'en') {
         changelog = 'Release Notes';
     }
 

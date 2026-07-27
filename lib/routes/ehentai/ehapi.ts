@@ -1,9 +1,11 @@
+import path from 'node:path';
+
+import { load } from 'cheerio';
+
+import { config } from '@/config';
 import got from '@/utils/got';
 import logger from '@/utils/logger';
 import timezone from '@/utils/timezone';
-import { load } from 'cheerio';
-import path from 'node:path';
-import { config } from '@/config';
 
 const headers = {};
 const has_cookie = config.ehentai.ipb_member_id && config.ehentai.ipb_pass_hash && config.ehentai.sk;
@@ -29,8 +31,8 @@ function ehgot(url) {
 function ehgot_thumb(cache, thumb_url) {
     return cache.tryGet(thumb_url, async () => {
         try {
-            const buffer = await got({ method: 'get', url: thumb_url, headers });
-            const data = new Buffer.from(buffer.rawBody).toString('base64');
+            const buffer = await got({ method: 'get', responseType: 'buffer', url: thumb_url, headers });
+            const data = buffer.body.toString('base64');
             const ext = path.extname(thumb_url).slice(1);
             return `data:image/${ext};base64,${data}`;
         } catch (error) {
@@ -72,7 +74,7 @@ async function parsePage(cache, data, get_bittorrent = false, embed_thumb = fals
 
     async function parseElement(cache, element) {
         const el = $(element);
-        const title = el.find('div.glink').html();
+        const title = el.find('.glink').html();
         const rawDate = el.find('div[id^="posted_"]').text();
         const pubDate = rawDate ? timezone(rawDate, 0) : rawDate;
         let el_a;
@@ -159,7 +161,7 @@ function getBittorrent(cache, bittorrent_page_url) {
                     const match = onclick.match(/'(.*?)'/);
                     if (match) {
                         bittorrent_url = match[1];
-                        const match_p = bittorrent_url.match(/torrent\?p=(.*?)$/);
+                        const match_p = bittorrent_url.match(/torrent\?p=(.*)$/);
                         if (match_p) {
                             p = match_p[1];
                         }
@@ -176,10 +178,12 @@ function getBittorrent(cache, bittorrent_page_url) {
 function updateBittorrent_url(cache, items) {
     // 下种子文件需要动态密码，密码每几次请求就更新一次
     for (const item of items) {
-        if (item.enclosure_url) {
-            item.enclosure_url = item.enclosure_url.replace(/torrent\?p=.*$/, `torrent?p=${p}`);
-            cache.set(item.bittorrent_page_url, item.enclosure_url);
+        if (!item.enclosure_url) {
+            continue;
         }
+
+        item.enclosure_url = item.enclosure_url.replace(/torrent\?p=.*$/, () => `torrent?p=${p}`);
+        cache.set(item.bittorrent_page_url, item.enclosure_url);
     }
     return items;
 }
@@ -191,13 +195,12 @@ async function gatherItemsByPage(cache, url, get_bittorrent = false, embed_thumb
 }
 
 async function getFavoritesItems(cache, favcat, inline_set, page, get_bittorrent = false, embed_thumb = false) {
-    const response = await ehgot(`favorites.php?favcat=${favcat}&inline_set=${inline_set}`);
     if (page) {
         return gatherItemsByPage(cache, `favorites.php?favcat=${favcat}&next=${page}`, get_bittorrent, embed_thumb);
-    } else {
-        const items = await parsePage(cache, response.data, get_bittorrent, embed_thumb);
-        return updateBittorrent_url(cache, items);
     }
+    const response = await ehgot(`favorites.php?favcat=${favcat}&inline_set=${inline_set}`);
+    const items = await parsePage(cache, response.data, get_bittorrent, embed_thumb);
+    return updateBittorrent_url(cache, items);
 }
 
 function getSearchItems(cache, params, page, get_bittorrent = false, embed_thumb = false) {

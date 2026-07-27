@@ -1,12 +1,12 @@
-import { Route } from '@/types';
+import { load } from 'cheerio';
 
+import type { Route } from '@/types';
 import cache from '@/utils/cache';
 import got from '@/utils/got';
-import { load } from 'cheerio';
 import { parseDate } from '@/utils/parse-date';
 import timezone from '@/utils/timezone';
-import { art } from '@/utils/render';
-import path from 'node:path';
+
+import { renderOutlink } from './templates/outlink';
 
 const rootUrl = 'https://lvv2.com';
 
@@ -72,7 +72,7 @@ async function handler(ctx) {
                 const detailResponse = await got.get(item.link);
                 const content = load(detailResponse.data);
 
-                item.pubDate = timezone(parseDate(content('time').attr('datetime')), +8);
+                item.pubDate = timezone(parseDate(content('time').attr('datetime')), 8);
                 item.author = content('a.author').text();
                 const link = content('h2.title > a.title').attr('href');
                 item.description =
@@ -87,9 +87,7 @@ async function handler(ctx) {
 
                               return description;
                           })
-                        : art(path.join(__dirname, 'templates/outlink.art'), {
-                              outlink: link,
-                          });
+                        : renderOutlink(link);
 
                 return item;
             })
